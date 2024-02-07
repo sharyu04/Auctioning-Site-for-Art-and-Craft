@@ -16,13 +16,8 @@ const (
 	dbname   = "AuctionWebsite"
 )
 
-func InitializeDb() {
+func InitializeDb() (*sql.DB, error) {
 	psqlconn := fmt.Sprintf("host = %s port = %d user = %s password = %s dbname = %s sslmode = disable", host, port, user, password, dbname)
-	db, err := sql.Open("postgres", psqlconn)
-	if err != nil {
-		panic(err)
-	} else {
-		fmt.Println("Database connection successful!")
-	}
-	defer db.Close()
+	return sql.Open("postgres", psqlconn)
+
 }

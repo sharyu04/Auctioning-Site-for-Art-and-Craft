@@ -1,7 +1,17 @@
 package main
 
-import "github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/repository"
+import (
+	"fmt"
+
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/repository"
+)
 
 func main() {
-	repository.InitializeDb()
+	db, err := repository.InitializeDb()
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Database connection successful!")
+	}
+	defer db.Close()
 }
