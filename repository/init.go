@@ -2,9 +2,9 @@ package repository
 
 import (
 	// "database/sql"
-	"database/sql"
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
@@ -16,8 +16,8 @@ const (
 	dbname   = "AuctionWebsite"
 )
 
-func InitializeDb() (*sql.DB, error) {
+func InitializeDb() (*sqlx.DB, error) {
 	psqlconn := fmt.Sprintf("host = %s port = %d user = %s password = %s dbname = %s sslmode = disable", host, port, user, password, dbname)
-	return sql.Open("postgres", psqlconn)
+	return sqlx.Open("postgres", psqlconn)
 
 }
