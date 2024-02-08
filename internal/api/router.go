@@ -15,7 +15,9 @@ func NewRouter(deps app.Dependencies) mux.Router {
 	})
 
 	router.HandleFunc("/user/signup", createUserHandler(deps.UserService)).Methods("POST")
-	router.HandleFunc("/login", loginHandler(deps.UserService)).Methods("POST")
+	// router.HandleFunc("/login", loginHandler(deps.UserService)).Methods("POST")
+
+	router.HandleFunc("/artwork/create", createArtworkHandler(deps.ArtworkService)).Methods("POST")
 
 	return *router
 }

@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+
+	// "github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -39,10 +41,27 @@ func (us *userStore) CreateUser(user User) (User, error) {
 	user.Created_at = time.Now()
 	user.Role_id, _ = uuid.Parse("6a55565e-3b0f-48fe-854e-ea22ce1ff991")
 	err := us.DB.QueryRow("INSERT INTO users(id, firstname, lastname, email, password, created_at, role_id) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id",
-		user.Id, user.FirstName, user.LastName, user.Email, user.Password, user.Created_at, user.Role_id).Scan(&user.Id)
+		user.Id, user.FirstName, user.LastName, user.Email, user.Password, user.Created_at, user.Role_id).Scan(&user)
 
 	if err != nil {
 		return User{}, err
 	}
 	return user, nil
 }
+
+// func (us *userStore) GetUserByEmail(reqEmail string) (dto.User, error) {
+// 	rows,err := us.DB.Query("Select * from  users where email=$1", reqEmail)
+// 	if err != nil {
+// 		return dto.User{}, err
+// 	}
+
+// 	var user User
+// 	defer rows.Close()
+// 	for rows.Next(){
+// 		err := rows.Scan(&user.Email, &user.Password)
+// 		if err!=nil {
+// 			panic(err)
+// 		}
+// 	}
+// 	// return user, nil
+// }

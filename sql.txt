@@ -1,0 +1,17 @@
+create table role(id uuid primary key, name varchar);
+
+create table users(id uuid primary key, firstname varchar, lastname varchar, email varchar, password varchar
+, role_id uuid, created_at time, foreign key(role_id) references role(id));
+
+create table category(id uuid primary key, name varchar);
+
+create table bidStatus(id uuid primary key, name varchar);
+
+create table bids(id uuid primary key, artwork_id uuid, amount DOUBLE PRECISION, status uuid, bidder_id uuid
+,foreign key(bidder_id) references users(id), created_at time);
+
+create table artworks(id uuid, highest_bid uuid, name varchar, image varchar,starting_price double precision, category_id uuid, live_period time, status varchar, owner_id uuid, created_at time, foreign key(highest_bid) references bids(id), primary key(id), foreign key(owner_id) references users(id));
+
+alter table artworks add description varchar;
+
+alter table bids add foreign key(artwork_id) references artworks(id);
