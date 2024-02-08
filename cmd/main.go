@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/api"
-	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/app"
-	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/repository"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/api"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/repository"
 )
 
 func main() {
