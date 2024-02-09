@@ -43,6 +43,7 @@ func (as *artworkStore) CreateArtwork(artwork Artworks) (Artworks, error) {
 	artwork.Id = uuid.New()
 	artwork.Created_at = time.Now()
 	artwork.Status = "open"
+
 	err := as.DB.QueryRow("INSERT INTO artworks(id, name, image, starting_price, category_id, live_period,status, owner_id, created_at, description) VALUES($1, $2, $3, $4, $5, 'open', $6, $7, $8, $9) RETURNING id",
 		artwork.Id, artwork.Name, artwork.Image, artwork.Starting_price, artwork.Category_id, artwork.Live_period, artwork.Owner_id, artwork.Created_at, artwork.Description).Scan(&artwork.Id)
 
