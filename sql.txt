@@ -15,3 +15,15 @@ create table artworks(id uuid, highest_bid uuid, name varchar, image varchar,sta
 alter table artworks add description varchar;
 
 alter table bids add foreign key(artwork_id) references artworks(id);
+
+----- up to date ----
+
+Insert into category(id, name) values(gen_random_uuid(),'Canvas Painting');
+
+alter table artworks alter column live_period type varchar;
+
+insert into bidstatus(id, name) values(gen_random_uuid(),'live');
+
+insert into bidstatus(id, name) values(gen_random_uuid(),'accepted');
+
+insert into bidstatus(id, name) values(gen_random_uuid(),'rejected');

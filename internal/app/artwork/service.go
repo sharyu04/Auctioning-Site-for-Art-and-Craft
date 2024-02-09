@@ -1,6 +1,7 @@
 package artwork
 
 import (
+	"github.com/google/uuid"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/repository"
 )
@@ -20,13 +21,17 @@ func NewService(artworkRepo repository.ArtworkStorer) Service {
 }
 
 func (as *service) CreateArtwork(artworkDetails dto.CreateArtworkRequest) (artwork repository.Artworks, err error) {
+	category, err := as.artworkRepo.GetCategory(artworkDetails.Category)
+	owner, _ := uuid.Parse(artworkDetails.Owner_id)
 	artworkInfo := repository.Artworks{
 		Name:           artworkDetails.Name,
 		Description:    artworkDetails.Description,
 		Image:          artworkDetails.Image,
 		Starting_price: artworkDetails.Starting_price,
 		Live_period:    artworkDetails.Live_period,
-		Owner_id:       artworkDetails.Owner_id,
+		Owner_id:       owner,
+		Category_id:    category.Id,
 	}
+
 	return as.artworkRepo.CreateArtwork(artworkInfo)
 }
