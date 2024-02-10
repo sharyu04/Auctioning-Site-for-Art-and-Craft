@@ -2,6 +2,7 @@ package bid
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
@@ -30,16 +31,23 @@ func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bi
 	}
 
 	if highestBid == 0 {
-		err = errors.New("Starting price is %f : . Bid above the starting price")
-		return repository.Bids{}, err
+		if starting_price > bidDetails.Amount {
+			errMsg := fmt.Sprintf("Bid must be above the starting price (%.2f)", starting_price)
+			err := errors.New(errMsg)
+			return repository.Bids{}, err
+		}
 	}
 
 	if highestBid > bidDetails.Amount {
-		err = errors.New("Highest bid is %f : . Bid above the highest bid")
+		errMsg := fmt.Sprintf("Bid must be above the Highest bid (%.2f)", highestBid)
+		err := errors.New(errMsg)
 		return repository.Bids{}, err
 	}
 
 	status, err := bs.bidRepo.GetBidStatus("live")
+	if err != nil {
+		return repository.Bids{}, err
+	}
 	artworkId, _ := uuid.Parse(bidDetails.Artwork_id)
 	bidder, _ := uuid.Parse(bidDetails.Bidder_id)
 	bidInfo := repository.Bids{

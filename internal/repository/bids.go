@@ -78,6 +78,13 @@ func (bs *bidStore) CreateBid(bid Bids) (Bids, error) {
 	if err != nil {
 		return Bids{}, err
 	}
+
+	err = bs.DB.QueryRow("UPDATE artworks SET highest_bid = $1 where id = $2",
+		bid.Id, bid.Artwork_id).Scan()
+	if err != nil {
+		return Bids{}, err
+	}
+
 	return bid, nil
 }
 
