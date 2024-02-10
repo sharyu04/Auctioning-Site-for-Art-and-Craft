@@ -32,13 +32,13 @@ func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bi
 
 	if highestBid == 0 {
 		if starting_price > bidDetails.Amount {
-			errMsg := fmt.Sprintf("Bid must be above the starting price (%.2f)", starting_price)
+			errMsg := fmt.Sprintf("Bid must be equal to or above the starting price (%.2f)", starting_price)
 			err := errors.New(errMsg)
 			return repository.Bids{}, err
 		}
 	}
 
-	if highestBid > bidDetails.Amount {
+	if highestBid >= bidDetails.Amount {
 		errMsg := fmt.Sprintf("Bid must be above the Highest bid (%.2f)", highestBid)
 		err := errors.New(errMsg)
 		return repository.Bids{}, err

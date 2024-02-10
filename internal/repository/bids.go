@@ -46,6 +46,7 @@ func (bs *bidStore) CreateBid(bid Bids) (Bids, error) {
 	for rows.Next() {
 		err := rows.Scan(&ownerId)
 		if err != nil {
+			// fmt.Println("Returning createBid err 1")
 			return Bids{}, err
 		}
 	}
@@ -57,6 +58,7 @@ func (bs *bidStore) CreateBid(bid Bids) (Bids, error) {
 
 	rows, err = bs.DB.Query("SELECT * FROM bids where artwork_id = $1 and bidder_id = $2", bid.Artwork_id, bid.Bidder_id)
 	if err != nil {
+		// fmt.Println("Returning createBid err 2")
 		return Bids{}, err
 	}
 
@@ -76,12 +78,14 @@ func (bs *bidStore) CreateBid(bid Bids) (Bids, error) {
 		bid.Id, bid.Artwork_id, bid.Amount, bid.Status, bid.Bidder_id, bid.Created_at).Scan(&bid.Id)
 
 	if err != nil {
+		// fmt.Println("Returning createBid err 3")
 		return Bids{}, err
 	}
 
-	err = bs.DB.QueryRow("UPDATE artworks SET highest_bid = $1 where id = $2",
-		bid.Id, bid.Artwork_id).Scan()
+	var updateQueryId uuid.UUID
+	err = bs.DB.QueryRow("UPDATE artworks SET highest_bid = $1 where id = $2 RETURNING id", bid.Id, bid.Artwork_id).Scan(&updateQueryId)
 	if err != nil {
+		// fmt.Println("Returning createBid err 4")
 		return Bids{}, err
 	}
 
@@ -94,6 +98,7 @@ func (bs *bidStore) GetBidStatus(bidStatusName string) (BidStatus, error) {
 
 	rows, err := bs.DB.Query("SELECT id, name FROM bidstatus where name = $1", bidStatusName)
 	if err != nil {
+
 		return BidStatus{}, err
 	}
 
