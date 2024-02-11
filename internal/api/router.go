@@ -19,6 +19,7 @@ func NewRouter(deps app.Dependencies) mux.Router {
 
 	router.HandleFunc("/artwork/create", createArtworkHandler(deps.ArtworkService)).Methods("POST")
 	router.HandleFunc("/artworks", GetArtworksHandler(deps.ArtworkService))
+	router.HandleFunc("/artwork/{id}", GetArtworkByIdHandler(deps.ArtworkService))
 
 	router.HandleFunc("/bid/create", createBidHandler(deps.BidService)).Methods("POST")
 

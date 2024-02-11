@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/artwork"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
@@ -69,5 +70,30 @@ func GetArtworksHandler(artworkSvc artwork.Service) func(w http.ResponseWriter, 
 
 		w.WriteHeader(http.StatusOK)
 		w.Write(resBody)
+	}
+}
+
+func GetArtworkByIdHandler(artworkSvc artwork.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		res, err := artworkSvc.GetArtworkByID(id)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		resBody, err := json.Marshal(res)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resBody)
+		return
 	}
 }

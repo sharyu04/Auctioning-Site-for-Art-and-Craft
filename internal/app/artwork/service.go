@@ -15,6 +15,7 @@ type service struct {
 type Service interface {
 	CreateArtwork(artworkDetails dto.CreateArtworkRequest) (repository.Artworks, error)
 	GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, error)
+	GetArtworkByID(id string) (dto.GetArtworkResponse, error)
 }
 
 func NewService(artworkRepo repository.ArtworkStorer) Service {
@@ -59,4 +60,12 @@ func (as *service) GetArtworks(category string, start int, count int) ([]dto.Get
 		return artworkList, nil
 	}
 
+}
+
+func (as *service) GetArtworkByID(id string) (dto.GetArtworkResponse, error) {
+	artworkId, err := uuid.Parse(id)
+	if err != nil {
+		return dto.GetArtworkResponse{}, err
+	}
+	return as.artworkRepo.GetArtworkById(artworkId)
 }

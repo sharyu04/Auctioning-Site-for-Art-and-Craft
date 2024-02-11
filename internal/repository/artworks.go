@@ -13,10 +13,11 @@ type ArtworkStorer interface {
 	GetCategory(categoryName string) (Category, error)
 	GetAllArtworks(start, count int) ([]dto.GetArtworkResponse, error)
 	GetFilterArtworks(category string, start, count int) ([]dto.GetArtworkResponse, error)
+	GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkResponse, error)
 }
 
 type Artworks struct {
-	Id             uuid.UUID `db:id`
+	Id             uuid.UUID
 	Name           string
 	Description    string
 	Image          string
@@ -112,7 +113,7 @@ func (as *artworkStore) GetFilterArtworks(category string, start, count int) ([]
 		var a dto.GetArtworkResponse
 		var highest_bid uuid.UUID
 		if err := row.Scan(&a.Id, &a.Name, &a.Description, &a.Image, &a.Starting_price, &a.Category, &a.Closing_time, &a.Owner_id, &a.Created_at, &highest_bid); err != nil {
-			return nil, err
+			return []dto.GetArtworkResponse{}, err
 		}
 		if highest_bid != uuid.Nil {
 			err := as.DB.QueryRow("SELECT amount FROM bids where bids.id = $1", highest_bid).Scan(&a.Highest_bid)
@@ -127,4 +128,28 @@ func (as *artworkStore) GetFilterArtworks(category string, start, count int) ([]
 
 	return artworks, nil
 
+}
+
+func (as *artworkStore) GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkResponse, error) {
+	row, err := as.DB.Query("select artworks.id, artworks.name, artworks.description, artworks.image, artworks.starting_price, category.name, artworks.closing_time, artworks.owner_id, artworks.created_at, artworks.highest_bid from artworks inner join category on artworks.category_id = category.id where artworks.id = $1", artworkId)
+	if err != nil {
+		return dto.GetArtworkResponse{}, err
+	}
+	defer row.Close()
+	var a dto.GetArtworkResponse
+	for row.Next() {
+		var highest_bid uuid.UUID
+		if err := row.Scan(&a.Id, &a.Name, &a.Description, &a.Image, &a.Starting_price, &a.Category, &a.Closing_time, &a.Owner_id, &a.Created_at, &highest_bid); err != nil {
+			return dto.GetArtworkResponse{}, err
+		}
+		if highest_bid != uuid.Nil {
+			err := as.DB.QueryRow("SELECT amount FROM bids where bids.id = $1", highest_bid).Scan(&a.Highest_bid)
+			if err != nil {
+				return dto.GetArtworkResponse{}, err
+			}
+		} else {
+			a.Highest_bid = 0
+		}
+	}
+	return a, nil
 }
