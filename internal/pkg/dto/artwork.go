@@ -7,13 +7,13 @@ import (
 )
 
 type CreateArtworkRequest struct {
-	Name           string
-	Description    string
-	Image          string
-	Starting_price float64
-	Duration       time.Duration
+	Name           string        `json: name`
+	Description    string        `json: desc`
+	Image          string        `json: image`
+	Starting_price float64       `json: starting_price`
+	Duration       time.Duration `json: duration`
 	Owner_id       string
-	Category       string
+	Category       string `json: category`
 }
 
 type GetArtworkResponse struct {

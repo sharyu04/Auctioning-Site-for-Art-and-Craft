@@ -8,7 +8,7 @@ import (
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
-func createBidHandler(bidSvc bid.Service) func(w http.ResponseWriter, r *http.Request) {
+func createBidHandler(bidSvc bid.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req dto.CreateBidRequest
 		err := json.NewDecoder(r.Body).Decode(&req)

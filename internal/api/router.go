@@ -1,11 +1,15 @@
 package api
 
 import (
+	// "encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app"
+
+	// "github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/artwork"
+	// "github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/middleware"
 )
 
@@ -22,11 +26,12 @@ func NewRouter(deps app.Dependencies) mux.Router {
 
 	router.Handle("/check", middleware.RequireAuth(checkHandler))
 
-	router.HandleFunc("/artwork/create", createArtworkHandler(deps.ArtworkService)).Methods("POST")
+	router.Handle("/artwork/create", middleware.RequireAuth(createArtworkHandler(deps.ArtworkService))).Methods("POST")
+	// router.HandleFunc("/artwork/create", createArtworkHandler(deps.ArtworkService)).Methods("POST")
 	router.HandleFunc("/artworks", GetArtworksHandler(deps.ArtworkService)).Methods("GET")
 	router.HandleFunc("/artwork/{id}", GetArtworkByIdHandler(deps.ArtworkService)).Methods("GET")
 
-	router.HandleFunc("/bid/create", createBidHandler(deps.BidService)).Methods("POST")
+	router.Handle("/bid/create", middleware.RequireAuth(createBidHandler(deps.BidService))).Methods("POST")
 
 	return *router
 }
