@@ -15,6 +15,7 @@ type service struct {
 
 type Service interface {
 	CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bids, err error)
+	UpdateBid(updateRequest dto.UpdateBidRequest, bidder_id string) (repository.Bids, error)
 }
 
 func NewService(bidRepo repository.BidStorer) Service {
@@ -58,4 +59,20 @@ func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bi
 	}
 
 	return bs.bidRepo.CreateBid(bidInfo)
+}
+
+func (bs *service) UpdateBid(updateRequest dto.UpdateBidRequest, bidder_id string) (repository.Bids, error) {
+	highestBid, _, err := bs.bidRepo.GetHighestBid(updateRequest.ArtworkId)
+	if err != nil {
+		return repository.Bids{}, err
+	}
+
+	if highestBid >= updateRequest.Amount {
+		errMsg := fmt.Sprintf("Bid must be above the Highest bid (%.2f)", highestBid)
+		err := errors.New(errMsg)
+		return repository.Bids{}, err
+	}
+
+	return bs.bidRepo.UpdateBid(updateRequest, bidder_id)
+
 }

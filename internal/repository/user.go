@@ -31,8 +31,8 @@ type User struct {
 }
 
 type Role struct {
-	id   uuid.UUID
-	name string
+	id   uuid.UUID `db:id`
+	name string    `db:name`
 }
 
 type userStore struct {

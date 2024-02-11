@@ -42,35 +42,6 @@ func createArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	}
 }
 
-// func createArtworkHandler1(artworkSvc artwork.Service) func(w http.ResponseWriter, r *http.Request) {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		var req dto.CreateArtworkRequest
-// 		err := json.NewDecoder(r.Body).Decode(&req)
-// 		if err != nil {
-// 			w.WriteHeader(http.StatusBadRequest)
-// 			w.Write([]byte(err.Error()))
-// 			return
-// 		}
-
-// 		resBody, err := artworkSvc.CreateArtwork(req)
-// 		if err != nil {
-// 			w.WriteHeader(http.StatusBadRequest)
-// 			w.Write([]byte(err.Error()))
-// 			return
-// 		}
-
-// 		respJson, err := json.Marshal(resBody)
-// 		if err != nil {
-// 			w.WriteHeader(http.StatusBadRequest)
-// 			w.Write([]byte(err.Error()))
-// 			return
-// 		}
-// 		w.WriteHeader(http.StatusOK)
-// 		w.Write(respJson)
-// 		return
-// 	}
-// }
-
 func GetArtworksHandler(artworkSvc artwork.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		category := r.URL.Query().Get("category")

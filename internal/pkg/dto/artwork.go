@@ -17,14 +17,14 @@ type CreateArtworkRequest struct {
 }
 
 type GetArtworkResponse struct {
-	Id             uuid.UUID
-	Name           string
-	Description    string
-	Image          string
-	Starting_price float64
+	Id             uuid.UUID `db: id`
+	Name           string    `db: name`
+	Description    string    `db: description`
+	Image          string    `db: image`
+	Starting_price float64   `db: starting_price`
 	Category       string
-	Closing_time   string
-	Owner_id       uuid.UUID
-	Highest_bid    int
-	Created_at     time.Time
+	Closing_time   string    `db: closing_time`
+	Owner_id       uuid.UUID `db:owner_id`
+	Highest_bid    int       `db: highest_bid`
+	Created_at     time.Time `db:created_at`
 }
