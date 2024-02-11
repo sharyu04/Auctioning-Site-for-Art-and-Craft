@@ -3,6 +3,7 @@ package dto
 import (
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 )
 
@@ -11,7 +12,8 @@ type User struct {
 	FirstName  string    `json:firstname`
 	LastName   string    `json:lastname`
 	Email      string    `json:email`
-	Role_id    uuid.UUID `json:role_id`
+	Password   string    `json:password`
+	Role       string    `json:role_id`
 	Created_at time.Time `json:created_at`
 }
 
@@ -25,4 +27,10 @@ type CreateUserRequest struct {
 type LoginRequest struct {
 	Email    string `json:email`
 	Password string `json:password`
+}
+
+type Claims struct {
+	Id   uuid.UUID `json:email`
+	Role string
+	jwt.StandardClaims
 }

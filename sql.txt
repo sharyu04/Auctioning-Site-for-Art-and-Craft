@@ -38,3 +38,5 @@ select artworks.*, category.name, bids.amount
 from artworks 
 inner join category on artworks.category_id = category.id
 inner join bids on artworks.highest_bid=bids.id;
+
+insert into role(id, name) values(gen_random_uuid(),'admin');
