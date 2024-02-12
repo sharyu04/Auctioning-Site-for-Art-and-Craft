@@ -1,6 +1,7 @@
 package artwork
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ type Service interface {
 	CreateArtwork(artworkDetails dto.CreateArtworkRequest) (repository.Artworks, error)
 	GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, error)
 	GetArtworkByID(id string) (dto.GetArtworkResponse, error)
+	DeleteArtworkById(id string, owner_id string, role string) error
 }
 
 func NewService(artworkRepo repository.ArtworkStorer) Service {
@@ -25,6 +27,11 @@ func NewService(artworkRepo repository.ArtworkStorer) Service {
 }
 
 func (as *service) CreateArtwork(artworkDetails dto.CreateArtworkRequest) (repository.Artworks, error) {
+
+	if artworkDetails.Name == "" || artworkDetails.Description == "" || artworkDetails.Image == "" || artworkDetails.Category == "" || artworkDetails.Duration == 0 {
+		return repository.Artworks{}, errors.New("Empty required fields!")
+	}
+
 	category, err := as.artworkRepo.GetCategory(artworkDetails.Category)
 	if err != nil {
 		return repository.Artworks{}, err
@@ -47,6 +54,10 @@ func (as *service) CreateArtwork(artworkDetails dto.CreateArtworkRequest) (repos
 func (as *service) GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, error) {
 
 	if category != "" {
+		// categoryExists, err := as.artworkRepo.GetCategory(category)
+		// if err != nil {
+		// 	return nil, err
+		// }
 		artworkList, err := as.artworkRepo.GetFilterArtworks(category, start, count)
 		if err != nil {
 			return nil, err
@@ -68,4 +79,23 @@ func (as *service) GetArtworkByID(id string) (dto.GetArtworkResponse, error) {
 		return dto.GetArtworkResponse{}, err
 	}
 	return as.artworkRepo.GetArtworkById(artworkId)
+}
+
+func (as *service) DeleteArtworkById(id string, owner_id string, role string) error {
+	artworkId, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	ownerId, err := uuid.Parse(owner_id)
+	if err != nil {
+		return err
+	}
+
+	err = as.artworkRepo.DeleteArtworkById(artworkId, ownerId, role)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

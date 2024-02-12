@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,6 +15,7 @@ type ArtworkStorer interface {
 	GetAllArtworks(start, count int) ([]dto.GetArtworkResponse, error)
 	GetFilterArtworks(category string, start, count int) ([]dto.GetArtworkResponse, error)
 	GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkResponse, error)
+	DeleteArtworkById(artworkId uuid.UUID, ownerId uuid.UUID, role string) error
 }
 
 type Artworks struct {
@@ -63,12 +65,17 @@ func (as *artworkStore) GetCategory(categoryName string) (Category, error) {
 	if err != nil {
 		return Category{}, err
 	}
-
+	i := 0
 	for rows.Next() {
+		i++
 		err := rows.Scan(&category.Id, &category.Name)
 		if err != nil {
 			return Category{}, err
 		}
+	}
+
+	if i == 0 {
+		return Category{}, errors.New("Please choose correct category")
 	}
 
 	return category, nil
@@ -137,6 +144,7 @@ func (as *artworkStore) GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkRespo
 	}
 	defer row.Close()
 	var a dto.GetArtworkResponse
+	i := 0
 	for row.Next() {
 		var highest_bid uuid.UUID
 		if err := row.Scan(&a.Id, &a.Name, &a.Description, &a.Image, &a.Starting_price, &a.Category, &a.Closing_time, &a.Owner_id, &a.Created_at, &highest_bid); err != nil {
@@ -150,6 +158,51 @@ func (as *artworkStore) GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkRespo
 		} else {
 			a.Highest_bid = 0
 		}
+		i++
+	}
+
+	if i == 0 {
+		return dto.GetArtworkResponse{}, errors.New("Wrong atrwork id")
 	}
 	return a, nil
+}
+
+func (as *artworkStore) DeleteArtworkById(artworkId uuid.UUID, ownerId uuid.UUID, role string) error {
+	if role == "user" {
+		rows, err := as.DB.Query("SELECT * FROM artworks where id = $1 and owner_id = $2", artworkId, ownerId)
+		if err != nil {
+			return err
+		}
+		i := 0
+		for rows.Next() {
+			i++
+		}
+		if i == 0 {
+			return errors.New("Logged in user does not own any such artwork!")
+		}
+	}
+
+	_, err := as.DB.Query("Update artworks set highest_bid = null where id = $1", artworkId)
+	if err != nil {
+
+		return err
+	}
+
+	_, err = as.DB.Query("Delete from bids where artwork_id = $1", artworkId)
+	if err != nil {
+		return err
+	}
+
+	_, err = as.DB.Query("Delete from artworks where id = $1", artworkId)
+	if err != nil {
+		return err
+	}
+
+	_, err = as.DB.Query("Delete from artworks where id = $1", artworkId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

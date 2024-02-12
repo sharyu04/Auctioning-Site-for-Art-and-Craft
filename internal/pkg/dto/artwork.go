@@ -8,7 +8,7 @@ import (
 
 type CreateArtworkRequest struct {
 	Name           string        `json: name`
-	Description    string        `json: desc`
+	Description    string        `json: description`
 	Image          string        `json: image`
 	Starting_price float64       `json: starting_price`
 	Duration       time.Duration `json: duration`

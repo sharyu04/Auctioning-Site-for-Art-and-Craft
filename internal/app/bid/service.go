@@ -26,6 +26,10 @@ func NewService(bidRepo repository.BidStorer) Service {
 
 func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bids, err error) {
 
+	if bidDetails.Artwork_id == "" {
+		return repository.Bids{}, errors.New("Enter Artwork Id")
+	}
+
 	highestBid, starting_price, err := bs.bidRepo.GetHighestBid(bidDetails.Artwork_id)
 	if err != nil {
 		return repository.Bids{}, err
@@ -64,6 +68,7 @@ func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bi
 func (bs *service) UpdateBid(updateRequest dto.UpdateBidRequest, bidder_id string) (repository.Bids, error) {
 	highestBid, _, err := bs.bidRepo.GetHighestBid(updateRequest.ArtworkId)
 	if err != nil {
+		fmt.Println("Error 5")
 		return repository.Bids{}, err
 	}
 
@@ -72,6 +77,8 @@ func (bs *service) UpdateBid(updateRequest dto.UpdateBidRequest, bidder_id strin
 		err := errors.New(errMsg)
 		return repository.Bids{}, err
 	}
+
+	// updateRequest.ArtworkId, _ = uuid.Parse(updateRequest.ArtworkId)
 
 	return bs.bidRepo.UpdateBid(updateRequest, bidder_id)
 

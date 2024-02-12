@@ -20,8 +20,7 @@ func createArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 			return
 		}
 
-		user_id := r.Header.Get("user_id")
-		req.Owner_id = user_id
+		req.Owner_id = r.Header.Get("user_id")
 
 		resBody, err := artworkSvc.CreateArtwork(req)
 		if err != nil {
@@ -51,6 +50,7 @@ func GetArtworksHandler(artworkSvc artwork.Service) func(w http.ResponseWriter, 
 		if start == "" || count == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("start and count values missing!"))
+			return
 		}
 
 		startInt, _ := strconv.Atoi(start)
@@ -97,6 +97,28 @@ func GetArtworkByIdHandler(artworkSvc artwork.Service) func(w http.ResponseWrite
 
 		w.WriteHeader(http.StatusOK)
 		w.Write(resBody)
+		return
+	}
+}
+
+func DeleteArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		Owner_id := r.Header.Get("user_id")
+		role := r.Header.Get("role")
+
+		err := artworkSvc.DeleteArtworkById(id, Owner_id, role)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Artwork deleted"))
 		return
 	}
 }

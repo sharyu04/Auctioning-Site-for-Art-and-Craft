@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -38,8 +39,16 @@ func createUserHandler(userSvc user.Service) func(w http.ResponseWriter, r *http
 	}
 }
 
-func createAdminHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Request) {
+func createAdminHandler(userSvc user.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		role := r.Header.Get("role")
+		fmt.Println(role)
+		if role != "super_admin" {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized to register admin"))
+			return
+		}
+
 		var req dto.CreateUserRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {

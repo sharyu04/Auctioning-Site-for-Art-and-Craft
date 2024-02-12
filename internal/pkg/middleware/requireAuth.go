@@ -2,12 +2,13 @@ package middleware
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
-func RequireAuth(next http.Handler) http.Handler {
+func RequireAuth(next http.Handler, roles []string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var jwtKey = []byte("secret_key")
@@ -49,6 +50,12 @@ func RequireAuth(next http.Handler) http.Handler {
 
 		Id := claims.Id
 		Role := claims.Role
+
+		if !slices.Contains(roles, Role) {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Role unauthorized"))
+			return
+		}
 
 		r.Header.Set("user_id", Id.String())
 		r.Header.Set("role", Role)

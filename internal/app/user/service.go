@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -30,6 +29,9 @@ func NewService(userRepo repository.UserStorer) Service {
 }
 
 func (us *service) CreateUser(userDetails dto.CreateUserRequest) (user repository.User, err error) {
+	if userDetails.FirstName == "" || userDetails.LastName == "" || userDetails.Email == "" || userDetails.Password == "" {
+		return repository.User{}, errors.New("Invalid Input")
+	}
 	userInfo := repository.User{
 		FirstName: userDetails.FirstName,
 		LastName:  userDetails.LastName,
@@ -40,6 +42,9 @@ func (us *service) CreateUser(userDetails dto.CreateUserRequest) (user repositor
 }
 
 func (us *service) CreateAdmin(userDetails dto.CreateUserRequest) (user repository.User, err error) {
+	if userDetails.FirstName == "" || userDetails.LastName == "" || userDetails.Email == "" || userDetails.Password == "" {
+		return repository.User{}, errors.New("Invalid Input")
+	}
 	userInfo := repository.User{
 		FirstName: userDetails.FirstName,
 		LastName:  userDetails.LastName,
@@ -80,7 +85,6 @@ func (us *service) LoginUser(credentials dto.LoginRequest) (string, error) {
 	tokenString, err := token.SignedString(jwtKey)
 
 	if err != nil {
-		fmt.Print("Error here")
 		return "", err
 	}
 
