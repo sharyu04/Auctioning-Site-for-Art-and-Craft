@@ -2,22 +2,19 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
-
-	// "github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
-
-	// "github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type UserStorer interface {
-	CreateUser(user User) (User, error)
-	CreateAdmin(user User) (User, error)
+	CreateUser(user User) (dto.UserSignupResponse, error)
 	GetUserByEmail(reqEmail string) (dto.User, error)
+	CheckEmailExists(user User) error
+	GetRoleID(role string) (uuid.UUID, error)
 }
 
 type User struct {
@@ -45,10 +42,10 @@ func NewUserRepo(db *sqlx.DB) UserStorer {
 	}
 }
 
-func (us *userStore) CreateUser(user User) (User, error) {
+func (us *userStore) CheckEmailExists(user User) error {
 	rows, err := us.DB.Query("Select * from  users where email=$1", user.Email)
 	if err != nil {
-		return User{}, err
+		return err
 	}
 
 	i := 0
@@ -58,51 +55,31 @@ func (us *userStore) CreateUser(user User) (User, error) {
 
 	if i != 0 {
 		err = errors.New("User with this email id already exists!")
-		return User{}, err
+		return err
 	}
 
-	user.Id = uuid.New()
-	byte, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
-	user.Password = string(byte)
-	user.Created_at = time.Now()
-	user.Role_id, _ = uuid.Parse("6a55565e-3b0f-48fe-854e-ea22ce1ff991")
-	err = us.DB.QueryRow("INSERT INTO users(id, firstname, lastname, email, password, created_at, role_id) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id",
-		user.Id, user.FirstName, user.LastName, user.Email, user.Password, user.Created_at, user.Role_id).Scan(&user.Id)
-
-	if err != nil {
-		return User{}, err
-	}
-	return user, nil
+	return nil
 }
 
-func (us *userStore) CreateAdmin(user User) (User, error) {
-	rows, err := us.DB.Query("Select * from  users where email=$1", user.Email)
-	if err != nil {
-		return User{}, err
-	}
+func (us *userStore) CreateUser(user User) (dto.UserSignupResponse, error) {
 
-	i := 0
-	for rows.Next() {
-		i++
-	}
-
-	if i != 0 {
-		err = errors.New("User with this email id already exists!")
-		return User{}, err
-	}
-
-	user.Id = uuid.New()
-	byte, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
-	user.Password = string(byte)
-	user.Created_at = time.Now()
-	user.Role_id, _ = uuid.Parse("d832c38a-ce9b-43ae-8755-0a66f669acf2")
-	err = us.DB.QueryRow("INSERT INTO users(id, firstname, lastname, email, password, created_at, role_id) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+	err := us.DB.QueryRow("INSERT INTO users(id, firstname, lastname, email, password, created_at, role_id) VALUES($1, $2, $3, $4, $5, $6,$7) RETURNING id",
 		user.Id, user.FirstName, user.LastName, user.Email, user.Password, user.Created_at, user.Role_id).Scan(&user.Id)
 
 	if err != nil {
-		return User{}, err
+		return dto.UserSignupResponse{}, err
 	}
-	return user, nil
+
+	resUser := dto.UserSignupResponse{
+		Id:         user.Id,
+		FirstName:  user.FirstName,
+		LastName:   user.LastName,
+		Email:      user.Email,
+		Created_at: user.Created_at,
+		Role_id:    user.Role_id,
+	}
+
+	return resUser, nil
 }
 
 func (us *userStore) GetUserByEmail(reqEmail string) (dto.User, error) {
@@ -127,4 +104,14 @@ func (us *userStore) GetUserByEmail(reqEmail string) (dto.User, error) {
 
 	}
 	return user, nil
+}
+
+func (us *userStore) GetRoleID(role string) (uuid.UUID, error) {
+	var roleId uuid.UUID
+	err := us.DB.QueryRow("Select id from role where name=$1", role).Scan(&roleId)
+	if err != nil {
+		fmt.Println("Error here ", role)
+		return uuid.Nil, err
+	}
+	return roleId, nil
 }

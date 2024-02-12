@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -10,8 +9,9 @@ import (
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
-func createUserHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Request) {
+func createUserHandler(userSvc user.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		var req dto.CreateUserRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
@@ -20,44 +20,9 @@ func createUserHandler(userSvc user.Service) func(w http.ResponseWriter, r *http
 			return
 		}
 
-		resBody, err := userSvc.CreateUser(req)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
-		}
-
-		respJson, err := json.Marshal(resBody)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		w.Write(respJson)
-		return
-	}
-}
-
-func createAdminHandler(userSvc user.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
 		role := r.Header.Get("role")
-		fmt.Println(role)
-		if role != "super_admin" {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized to register admin"))
-			return
-		}
 
-		var req dto.CreateUserRequest
-		err := json.NewDecoder(r.Body).Decode(&req)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
-		}
-
-		resBody, err := userSvc.CreateAdmin(req)
+		resBody, err := userSvc.CreateUser(req, role)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
@@ -108,8 +73,12 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 		cookie.Path = "/"
 		http.SetCookie(w, &cookie)
 
+		resBody := map[string]string{
+			"auth-token": token,
+		}
+		res, err := json.Marshal(resBody)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(token))
+		w.Write(res)
 		return
 	}
 }

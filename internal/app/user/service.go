@@ -2,14 +2,16 @@ package user
 
 import (
 	"errors"
+	"regexp"
 	"time"
+	"unicode"
 
 	"github.com/golang-jwt/jwt"
-	// "github.com/golang-jwt/jwt/V4"
+	"github.com/google/uuid"
+
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/repository"
 	"golang.org/x/crypto/bcrypt"
-	// "github.com/dgrijalva/jwt-go"
 )
 
 type service struct {
@@ -17,8 +19,7 @@ type service struct {
 }
 
 type Service interface {
-	CreateUser(userDetails dto.CreateUserRequest) (repository.User, error)
-	CreateAdmin(userDetails dto.CreateUserRequest) (repository.User, error)
+	CreateUser(userDetails dto.CreateUserRequest, role string) (dto.UserSignupResponse, error)
 	LoginUser(credentials dto.LoginRequest) (string, error)
 }
 
@@ -28,30 +29,83 @@ func NewService(userRepo repository.UserStorer) Service {
 	}
 }
 
-func (us *service) CreateUser(userDetails dto.CreateUserRequest) (user repository.User, err error) {
-	if userDetails.FirstName == "" || userDetails.LastName == "" || userDetails.Email == "" || userDetails.Password == "" {
-		return repository.User{}, errors.New("Invalid Input")
+func verifyPassword(s string) (sevenOrMore, number, upper, special bool) {
+	letters := 0
+	for _, c := range s {
+		switch {
+		case unicode.IsNumber(c):
+			number = true
+			letters++
+		case unicode.IsUpper(c):
+			upper = true
+			letters++
+		case unicode.IsPunct(c) || unicode.IsSymbol(c):
+			special = true
+			letters++
+		case unicode.IsLetter(c) || c == ' ':
+			letters++
+		default:
+			//return false, false, false, false
+		}
 	}
-	userInfo := repository.User{
-		FirstName: userDetails.FirstName,
-		LastName:  userDetails.LastName,
-		Email:     userDetails.Email,
-		Password:  userDetails.Password,
-	}
-	return us.userRepo.CreateUser(userInfo)
+	sevenOrMore = letters >= 7
+	return
 }
 
-func (us *service) CreateAdmin(userDetails dto.CreateUserRequest) (user repository.User, err error) {
+func createUserValidations(userDetails dto.CreateUserRequest) error {
 	if userDetails.FirstName == "" || userDetails.LastName == "" || userDetails.Email == "" || userDetails.Password == "" {
-		return repository.User{}, errors.New("Invalid Input")
+		return errors.New("Invalid Input")
+
 	}
+
+	pattern := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	matches := pattern.MatchString(userDetails.Email)
+
+	if !matches {
+		return errors.New("Invalid email")
+	}
+
+	sevenOrMore, number, upper, special := verifyPassword(userDetails.Password)
+
+	if sevenOrMore == false || number == false || upper == false || special == false {
+		return errors.New("Invalid password")
+	}
+
+	return nil
+}
+
+func (us *service) CreateUser(userDetails dto.CreateUserRequest, role string) (dto.UserSignupResponse, error) {
+
+	err := createUserValidations(userDetails)
+	if err != nil {
+		return dto.UserSignupResponse{}, err
+	}
+
 	userInfo := repository.User{
 		FirstName: userDetails.FirstName,
 		LastName:  userDetails.LastName,
 		Email:     userDetails.Email,
 		Password:  userDetails.Password,
 	}
-	return us.userRepo.CreateAdmin(userInfo)
+
+	err = us.userRepo.CheckEmailExists(userInfo)
+	if err != nil {
+		return dto.UserSignupResponse{}, err
+	}
+
+	userInfo.Id = uuid.New()
+	byte, _ := bcrypt.GenerateFromPassword([]byte(userInfo.Password), 14)
+	userInfo.Password = string(byte)
+	userInfo.Created_at = time.Now()
+	if role == "" {
+		role = "user"
+	}
+	userInfo.Role_id, err = us.userRepo.GetRoleID(role)
+	if err != nil {
+		return dto.UserSignupResponse{}, err
+	}
+
+	return us.userRepo.CreateUser(userInfo)
 }
 
 func (us *service) LoginUser(credentials dto.LoginRequest) (string, error) {
@@ -78,8 +132,6 @@ func (us *service) LoginUser(credentials dto.LoginRequest) (string, error) {
 	}
 
 	var jwtKey = []byte("secret_key")
-
-	// token, err := getToken(credentials.Email)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)

@@ -8,8 +8,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app"
 
-	// "github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/artwork"
-	// "github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/middleware"
 )
 
@@ -21,7 +19,7 @@ func NewRouter(deps app.Dependencies) mux.Router {
 	})
 
 	router.HandleFunc("/user/signup", createUserHandler(deps.UserService)).Methods("POST")
-	router.Handle("/admin/signup", middleware.RequireAuth(createAdminHandler(deps.UserService), []string{"super_admin", "admin"})).Methods("POST")
+	router.Handle("/admin/signup", middleware.RequireAuth(createUserHandler(deps.UserService), []string{"super_admin", "admin"})).Methods("POST")
 	router.HandleFunc("/login", loginHandler(deps.UserService)).Methods("POST")
 
 	router.Handle("/check", middleware.RequireAuth(checkHandler, []string{"user", "admin", "super_admin"}))

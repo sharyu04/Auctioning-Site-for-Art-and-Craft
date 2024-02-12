@@ -34,3 +34,12 @@ type Claims struct {
 	Role string
 	jwt.StandardClaims
 }
+
+type UserSignupResponse struct {
+	Id         uuid.UUID `json:id`
+	FirstName  string    `json:firstname`
+	LastName   string    `json:lastname`
+	Email      string    `json:email`
+	Role_id    uuid.UUID `json:role_id`
+	Created_at time.Time `json:created_at`
+}
