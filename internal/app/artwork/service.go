@@ -54,10 +54,11 @@ func (as *service) CreateArtwork(artworkDetails dto.CreateArtworkRequest) (repos
 func (as *service) GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, error) {
 
 	if category != "" {
-		// categoryExists, err := as.artworkRepo.GetCategory(category)
-		// if err != nil {
-		// 	return nil, err
-		// }
+		_, err := as.artworkRepo.GetCategory(category)
+		if err != nil {
+			return nil, err
+		}
+
 		artworkList, err := as.artworkRepo.GetFilterArtworks(category, start, count)
 		if err != nil {
 			return nil, err

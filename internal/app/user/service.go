@@ -21,6 +21,7 @@ type service struct {
 type Service interface {
 	CreateUser(userDetails dto.CreateUserRequest, role string) (dto.UserSignupResponse, error)
 	LoginUser(credentials dto.LoginRequest) (string, error)
+	GetAllUsers(start, count int, role string) ([]dto.GetAllUserResponse, error)
 }
 
 func NewService(userRepo repository.UserStorer) Service {
@@ -141,4 +142,24 @@ func (us *service) LoginUser(credentials dto.LoginRequest) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func (us *service) GetAllUsers(start, count int, role string) ([]dto.GetAllUserResponse, error) {
+
+	if role != "" {
+		if role != "admin" && role != "super_admin" && role != "user" {
+			return nil, errors.New("Invalid role")
+		}
+		userList, err := us.userRepo.GetAllUsersByRole(start, count, role)
+		if err != nil {
+			return nil, err
+		}
+		return userList, nil
+	}
+
+	userList, err := us.userRepo.GetAllUsers(start, count)
+	if err != nil {
+		return nil, err
+	}
+	return userList, nil
 }

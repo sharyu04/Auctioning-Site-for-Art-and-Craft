@@ -15,6 +15,8 @@ type UserStorer interface {
 	GetUserByEmail(reqEmail string) (dto.User, error)
 	CheckEmailExists(user User) error
 	GetRoleID(role string) (uuid.UUID, error)
+	GetAllUsers(start, count int) ([]dto.GetAllUserResponse, error)
+	GetAllUsersByRole(start, count int, role string) ([]dto.GetAllUserResponse, error)
 }
 
 type User struct {
@@ -114,4 +116,41 @@ func (us *userStore) GetRoleID(role string) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 	return roleId, nil
+}
+
+func (us *userStore) GetAllUsers(start, count int) ([]dto.GetAllUserResponse, error) {
+	rows, err := us.DB.Query("select u.id, u.firstname, u.lastname, u.email, u.created_at, role.name from users as u join role on u.role_id=role.id Limit $1 offset $2;", count, start)
+	if err != nil {
+		return nil, err
+	}
+
+	var userList []dto.GetAllUserResponse
+	for rows.Next() {
+		var user dto.GetAllUserResponse
+		err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Created_at, &user.Role_id)
+		if err != nil {
+			fmt.Println("Error here")
+			return nil, err
+		}
+		userList = append(userList, user)
+	}
+	return userList, nil
+}
+
+func (us *userStore) GetAllUsersByRole(start, count int, role string) ([]dto.GetAllUserResponse, error) {
+	rows, err := us.DB.Query("select u.id, u.firstname, u.lastname, u.email, u.created_at, role.name from users as u join role on u.role_id=role.id where role.name=$1 Limit $2 offset $3;", role, count, start)
+	if err != nil {
+		return nil, err
+	}
+
+	var userList []dto.GetAllUserResponse
+	for rows.Next() {
+		var user dto.GetAllUserResponse
+		err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Created_at, &user.Role_id)
+		if err != nil {
+			return nil, err
+		}
+		userList = append(userList, user)
+	}
+	return userList, nil
 }

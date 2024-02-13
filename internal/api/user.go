@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/user"
@@ -80,5 +81,41 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusOK)
 		w.Write(res)
 		return
+	}
+}
+
+func GetAllUsersHandler(userSvc user.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := r.URL.Query().Get("start")
+		count := r.URL.Query().Get("count")
+		role := r.URL.Query().Get("role")
+
+		if start == "" || count == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("start and count values missing!"))
+			return
+		}
+
+		startInt, _ := strconv.Atoi(start)
+		countInt, _ := strconv.Atoi(count)
+
+		res, err := userSvc.GetAllUsers(startInt, countInt, role)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		resBody, err := json.Marshal(res)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resBody)
+		return
+
 	}
 }

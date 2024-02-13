@@ -18,19 +18,23 @@ func NewRouter(deps app.Dependencies) mux.Router {
 		w.Write([]byte("Server started"))
 	})
 
+	//user routes
 	router.HandleFunc("/user/signup", createUserHandler(deps.UserService)).Methods("POST")
 	router.Handle("/admin/signup", middleware.RequireAuth(createUserHandler(deps.UserService), []string{"super_admin", "admin"})).Methods("POST")
 	router.HandleFunc("/login", loginHandler(deps.UserService)).Methods("POST")
+	router.Handle("/users", middleware.RequireAuth(GetAllUsersHandler(deps.UserService), []string{"admin", "super_admin"})).Methods("Get")
 
 	router.Handle("/check", middleware.RequireAuth(checkHandler, []string{"user", "admin", "super_admin"}))
 
+	//artwork routes
 	router.Handle("/artwork/create", middleware.RequireAuth(createArtworkHandler(deps.ArtworkService), []string{"admin", "user"})).Methods("POST")
 	router.HandleFunc("/artworks", GetArtworksHandler(deps.ArtworkService)).Methods("GET")        //middleware
 	router.HandleFunc("/artwork/{id}", GetArtworkByIdHandler(deps.ArtworkService)).Methods("GET") //middleware
 	router.Handle("/artwork/{id}", middleware.RequireAuth(DeleteArtworkHandler(deps.ArtworkService), []string{"super_admin", "admin", "user"})).Methods("DELETE")
 
+	//bids routes
 	router.Handle("/bid/create", middleware.RequireAuth(createBidHandler(deps.BidService), []string{"user"})).Methods("POST")
-	router.Handle("/bid/update", middleware.RequireAuth(updateBidHandler(deps.BidService), []string{"user"})).Methods("PATCH") //PUT
+	router.Handle("/bid/update", middleware.RequireAuth(updateBidHandler(deps.BidService), []string{"user"})).Methods("PUT")
 
 	return *router
 }
