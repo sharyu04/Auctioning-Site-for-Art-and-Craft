@@ -2,10 +2,10 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/bid"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
@@ -46,9 +46,10 @@ func updateBidHandler(bidSvc bid.Service) http.HandlerFunc {
 		var req dto.UpdateBidRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			fmt.Println("Error 6")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -56,17 +57,19 @@ func updateBidHandler(bidSvc bid.Service) http.HandlerFunc {
 
 		resBody, err := bidSvc.UpdateBid(req, user_id)
 		if err != nil {
-			fmt.Println("Error 7")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		resJson, err := json.Marshal(resBody)
 		if err != nil {
-			fmt.Println("Error 8")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 

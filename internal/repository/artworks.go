@@ -1,11 +1,12 @@
 package repository
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
@@ -75,7 +76,7 @@ func (as *artworkStore) GetCategory(categoryName string) (Category, error) {
 	}
 
 	if i == 0 {
-		return Category{}, errors.New("Please choose correct category")
+		return Category{}, apperrors.BadRequest{ErrorMsg: "Invalid Category"}
 	}
 
 	return category, nil
@@ -162,7 +163,8 @@ func (as *artworkStore) GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkRespo
 	}
 
 	if i == 0 {
-		return dto.GetArtworkResponse{}, errors.New("Wrong atrwork id")
+		errMsg := fmt.Sprintf("Artworks not found with id: %v", artworkId)
+		return dto.GetArtworkResponse{}, apperrors.BadRequest{ErrorMsg: errMsg}
 	}
 	return a, nil
 }
@@ -178,7 +180,7 @@ func (as *artworkStore) DeleteArtworkById(artworkId uuid.UUID, ownerId uuid.UUID
 			i++
 		}
 		if i == 0 {
-			return errors.New("Logged in user does not own any such artwork!")
+			return apperrors.UnAuthorizedAccess{ErrorMsg: "Unauthorized Delete"}
 		}
 	}
 

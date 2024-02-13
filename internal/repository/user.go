@@ -127,9 +127,8 @@ func (us *userStore) GetAllUsers(start, count int) ([]dto.GetAllUserResponse, er
 	var userList []dto.GetAllUserResponse
 	for rows.Next() {
 		var user dto.GetAllUserResponse
-		err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Created_at, &user.Role_id)
+		err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.CreatedAt, &user.RoleID)
 		if err != nil {
-			fmt.Println("Error here")
 			return nil, err
 		}
 		userList = append(userList, user)
@@ -146,7 +145,7 @@ func (us *userStore) GetAllUsersByRole(start, count int, role string) ([]dto.Get
 	var userList []dto.GetAllUserResponse
 	for rows.Next() {
 		var user dto.GetAllUserResponse
-		err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Created_at, &user.Role_id)
+		err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.CreatedAt, &user.RoleID)
 		if err != nil {
 			return nil, err
 		}

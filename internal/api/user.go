@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/user"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
@@ -16,8 +17,10 @@ func createUserHandler(userSvc user.Service) http.HandlerFunc {
 		var req dto.CreateUserRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -25,15 +28,19 @@ func createUserHandler(userSvc user.Service) http.HandlerFunc {
 
 		resBody, err := userSvc.CreateUser(req, role)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		respJson, err := json.Marshal(resBody)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -47,21 +54,28 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 		var req dto.LoginRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		if len(req.Email) == 0 || len(req.Password) == 0 {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Please provide name and password to login"))
+			err := apperrors.BadRequest{ErrorMsg: "Please provide name and password to login"}
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		token, err := userSvc.LoginUser(req)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -91,8 +105,11 @@ func GetAllUsersHandler(userSvc user.Service) http.HandlerFunc {
 		role := r.URL.Query().Get("role")
 
 		if start == "" || count == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("start and count values missing!"))
+			err := apperrors.BadRequest{ErrorMsg: "start and count values missing!"}
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -101,15 +118,19 @@ func GetAllUsersHandler(userSvc user.Service) http.HandlerFunc {
 
 		res, err := userSvc.GetAllUsers(startInt, countInt, role)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		resBody, err := json.Marshal(res)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 

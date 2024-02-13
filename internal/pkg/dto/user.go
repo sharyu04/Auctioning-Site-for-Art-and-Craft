@@ -45,10 +45,10 @@ type UserSignupResponse struct {
 }
 
 type GetAllUserResponse struct {
-	Id         uuid.UUID `json:id`
-	FirstName  string    `json:firstname`
-	LastName   string    `json:lastname`
-	Email      string    `json:email`
-	Role_id    string    `json:role_id`
-	Created_at time.Time `json:created_at`
+	ID        uuid.UUID `json:"id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	RoleID    string    `json:"role_id"`
+	CreatedAt time.Time `json:"created_at"`
 }

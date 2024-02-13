@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"slices"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
@@ -16,12 +18,18 @@ func RequireAuth(next http.Handler, roles []string) http.Handler {
 		cookie, err := r.Cookie("accessToken")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte("Unauthorized, Auth Token not found!"))
+				err = apperrors.UnAuthorizedAccess{ErrorMsg: "Unauthorized, Auth Token not found!"}
+				errResponse := apperrors.MapError(err)
+				w.WriteHeader(errResponse.ErrorCode)
+				res, _ := json.Marshal(errResponse)
+				w.Write(res)
 				return
 			}
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			err = apperrors.UnAuthorizedAccess{ErrorMsg: err.Error()}
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -34,17 +42,27 @@ func RequireAuth(next http.Handler, roles []string) http.Handler {
 		})
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
-				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte(err.Error()))
+				err = apperrors.UnAuthorizedAccess{ErrorMsg: err.Error()}
+				errResponse := apperrors.MapError(err)
+				w.WriteHeader(errResponse.ErrorCode)
+				res, _ := json.Marshal(errResponse)
+				w.Write(res)
 				return
 			}
-			w.WriteHeader(http.StatusBadRequest)
+			err = apperrors.UnAuthorizedAccess{ErrorMsg: err.Error()}
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		if !tkn.Valid {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(err.Error()))
+			err := apperrors.UnAuthorizedAccess{ErrorMsg: "Token Invalid"}
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -52,8 +70,11 @@ func RequireAuth(next http.Handler, roles []string) http.Handler {
 		Role := claims.Role
 
 		if !slices.Contains(roles, Role) {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Role unauthorized"))
+			err := apperrors.UnAuthorizedAccess{ErrorMsg: "Role Unauthorized"}
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 

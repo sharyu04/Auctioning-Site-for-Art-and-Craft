@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/repository"
 	"golang.org/x/crypto/bcrypt"
@@ -79,7 +80,7 @@ func (us *service) CreateUser(userDetails dto.CreateUserRequest, role string) (d
 
 	err := createUserValidations(userDetails)
 	if err != nil {
-		return dto.UserSignupResponse{}, err
+		return dto.UserSignupResponse{}, apperrors.BadRequest{ErrorMsg: err.Error()}
 	}
 
 	userInfo := repository.User{
@@ -91,7 +92,7 @@ func (us *service) CreateUser(userDetails dto.CreateUserRequest, role string) (d
 
 	err = us.userRepo.CheckEmailExists(userInfo)
 	if err != nil {
-		return dto.UserSignupResponse{}, err
+		return dto.UserSignupResponse{}, apperrors.BadRequest{ErrorMsg: "User Already Exists"}
 	}
 
 	userInfo.Id = uuid.New()
@@ -120,8 +121,7 @@ func (us *service) LoginUser(credentials dto.LoginRequest) (string, error) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password))
 	if err != nil {
-		err = errors.New("Invalid credentials")
-		return "", err
+		return "", apperrors.BadRequest{ErrorMsg: "Invalid Credentials"}
 	}
 
 	claims := &dto.Claims{
@@ -148,11 +148,14 @@ func (us *service) GetAllUsers(start, count int, role string) ([]dto.GetAllUserR
 
 	if role != "" {
 		if role != "admin" && role != "super_admin" && role != "user" {
-			return nil, errors.New("Invalid role")
+			return nil, apperrors.BadRequest{ErrorMsg: "Invalid role"}
 		}
 		userList, err := us.userRepo.GetAllUsersByRole(start, count, role)
 		if err != nil {
 			return nil, err
+		}
+		if len(userList) == 0 {
+			return userList, apperrors.NoContent{ErrorMsg: "No Users Found!"}
 		}
 		return userList, nil
 	}
@@ -161,5 +164,10 @@ func (us *service) GetAllUsers(start, count int, role string) ([]dto.GetAllUserR
 	if err != nil {
 		return nil, err
 	}
+
+	if len(userList) == 0 {
+		return userList, apperrors.NoContent{ErrorMsg: "No Users Found!"}
+	}
+
 	return userList, nil
 }

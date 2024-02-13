@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/repository"
 )
@@ -27,7 +28,7 @@ func NewService(bidRepo repository.BidStorer) Service {
 func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bids, err error) {
 
 	if bidDetails.Artwork_id == "" {
-		return repository.Bids{}, errors.New("Enter Artwork Id")
+		return repository.Bids{}, apperrors.BadRequest{ErrorMsg: "ArtworkId Missing"}
 	}
 
 	highestBid, starting_price, err := bs.bidRepo.GetHighestBid(bidDetails.Artwork_id)
@@ -45,8 +46,7 @@ func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bi
 
 	if highestBid >= bidDetails.Amount {
 		errMsg := fmt.Sprintf("Bid must be above the Highest bid (%.2f)", highestBid)
-		err := errors.New(errMsg)
-		return repository.Bids{}, err
+		return repository.Bids{}, apperrors.BadRequest{ErrorMsg: errMsg}
 	}
 
 	status, err := bs.bidRepo.GetBidStatus("live")
@@ -68,17 +68,13 @@ func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bi
 func (bs *service) UpdateBid(updateRequest dto.UpdateBidRequest, bidder_id string) (repository.Bids, error) {
 	highestBid, _, err := bs.bidRepo.GetHighestBid(updateRequest.ArtworkId)
 	if err != nil {
-		fmt.Println("Error 5")
 		return repository.Bids{}, err
 	}
 
 	if highestBid >= updateRequest.Amount {
 		errMsg := fmt.Sprintf("Bid must be above the Highest bid (%.2f)", highestBid)
-		err := errors.New(errMsg)
-		return repository.Bids{}, err
+		return repository.Bids{}, apperrors.BadRequest{ErrorMsg: errMsg}
 	}
-
-	// updateRequest.ArtworkId, _ = uuid.Parse(updateRequest.ArtworkId)
 
 	return bs.bidRepo.UpdateBid(updateRequest, bidder_id)
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/artwork"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
@@ -15,8 +16,10 @@ func createArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 		var req dto.CreateArtworkRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -24,15 +27,19 @@ func createArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 
 		resBody, err := artworkSvc.CreateArtwork(req)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		respJson, err := json.Marshal(resBody)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -41,15 +48,18 @@ func createArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	}
 }
 
-func GetArtworksHandler(artworkSvc artwork.Service) func(w http.ResponseWriter, r *http.Request) {
+func GetArtworksHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		category := r.URL.Query().Get("category")
 		start := r.URL.Query().Get("start")
 		count := r.URL.Query().Get("count")
 
 		if start == "" || count == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("start and count values missing!"))
+			err := apperrors.BadRequest{ErrorMsg: "Start and count values are missing"}
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -59,15 +69,19 @@ func GetArtworksHandler(artworkSvc artwork.Service) func(w http.ResponseWriter, 
 		res, err := artworkSvc.GetArtworks(category, startInt, countInt)
 
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		resBody, err := json.Marshal(res)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write(resBody)
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -76,7 +90,7 @@ func GetArtworksHandler(artworkSvc artwork.Service) func(w http.ResponseWriter, 
 	}
 }
 
-func GetArtworkByIdHandler(artworkSvc artwork.Service) func(w http.ResponseWriter, r *http.Request) {
+func GetArtworkByIdHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"]

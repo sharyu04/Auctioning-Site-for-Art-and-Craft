@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 )
 
@@ -55,8 +55,8 @@ func (bs *bidStore) CreateBid(bid Bids) (Bids, error) {
 	}
 
 	if ownerId == bid.Bidder_id {
-		err = errors.New("You cannot bid on your own artwork listing")
-		return Bids{}, err
+		// err = errors.New("You cannot bid on your own artwork listing")
+		return Bids{}, apperrors.BadRequest{ErrorMsg: "You cannot bid on your own artwork"}
 	}
 
 	rows, err = bs.DB.Query("SELECT * FROM bids where artwork_id = $1 and bidder_id = $2", bid.Artwork_id, bid.Bidder_id)
@@ -70,8 +70,8 @@ func (bs *bidStore) CreateBid(bid Bids) (Bids, error) {
 	}
 
 	if i != 0 {
-		err = errors.New("Bid from user already exists!")
-		return Bids{}, err
+		// err = errors.New("Bid from user already exists!")
+		return Bids{}, apperrors.BadRequest{ErrorMsg: "Duplicate bid"}
 	}
 
 	bid.Id = uuid.New()
@@ -118,7 +118,6 @@ func (bs *bidStore) GetHighestBid(artWorkId string) (float64, float64, error) {
 	artWorkIdUuid, _ := uuid.Parse(artWorkId)
 	rows, err := bs.DB.Query("Select highest_bid, starting_price from artworks where id = $1", artWorkIdUuid)
 	if err != nil {
-		fmt.Println("Error GHB 1")
 		return 0, 0, err
 	}
 
@@ -128,14 +127,14 @@ func (bs *bidStore) GetHighestBid(artWorkId string) (float64, float64, error) {
 	for rows.Next() {
 		err = rows.Scan(&highestBidId, &starting_price)
 		if err != nil {
-			fmt.Println("Error GHB 2")
 			return 0, 0, err
 		}
 		i++
 	}
 
 	if i == 0 {
-		return 0, 0, errors.New("No such artwork exists!")
+		errMsg := fmt.Sprintf("Artworks not found with id: %v", artWorkIdUuid)
+		return 0, 0, apperrors.BadRequest{ErrorMsg: errMsg}
 	}
 
 	if highestBidId == uuid.Nil {
@@ -144,14 +143,12 @@ func (bs *bidStore) GetHighestBid(artWorkId string) (float64, float64, error) {
 
 	rows, err = bs.DB.Query("Select amount from bids where id = $1", highestBidId)
 	if err != nil {
-		fmt.Println("Error GHB 3")
 		return 0, 0, err
 	}
 	var highestBid float64
 	for rows.Next() {
 		err = rows.Scan(&highestBid)
 		if err != nil {
-			fmt.Println("Error GHB 4")
 			return 0, 0, err
 		}
 	}
@@ -167,8 +164,8 @@ func (bs *bidStore) UpdateBid(bid dto.UpdateBidRequest, bidder_id string) (Bids,
 		bid.Amount, bid.ArtworkId, bidder_id).Scan(&bidId)
 
 	if err != nil {
-		err = errors.New("No bid exist on the artwork from the logged in user!")
-		return Bids{}, err
+		// err = errors.New("No bid exist on the artwork from the logged in user!")
+		return Bids{}, apperrors.BadRequest{ErrorMsg: "Bid not found"}
 	}
 
 	// if bidId == uuid.Nil {
@@ -179,13 +176,11 @@ func (bs *bidStore) UpdateBid(bid dto.UpdateBidRequest, bidder_id string) (Bids,
 	var updateQueryId uuid.UUID
 	err = bs.DB.QueryRow("UPDATE artworks SET highest_bid = $1 where id = $2 RETURNING id", bidId, bid.ArtworkId).Scan(&updateQueryId)
 	if err != nil {
-		fmt.Println("Error 2")
 		return Bids{}, err
 	}
 
 	rows, err := bs.DB.Query("SELECT * FROM bids where id = $1", bidId)
 	if err != nil {
-		fmt.Println("Error 3")
 		return Bids{}, err
 	}
 
@@ -193,7 +188,6 @@ func (bs *bidStore) UpdateBid(bid dto.UpdateBidRequest, bidder_id string) (Bids,
 	for rows.Next() {
 		err = rows.Scan(&res.Id, &res.Artwork_id, &res.Amount, &res.Status, &res.Bidder_id, &res.Created_at)
 		if err != nil {
-			fmt.Println("Error 4")
 			return Bids{}, err
 		}
 	}

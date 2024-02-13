@@ -1,7 +1,6 @@
 package api
 
 import (
-	// "encoding/json"
 	"fmt"
 	"net/http"
 
@@ -28,8 +27,8 @@ func NewRouter(deps app.Dependencies) mux.Router {
 
 	//artwork routes
 	router.Handle("/artwork/create", middleware.RequireAuth(createArtworkHandler(deps.ArtworkService), []string{"admin", "user"})).Methods("POST")
-	router.HandleFunc("/artworks", GetArtworksHandler(deps.ArtworkService)).Methods("GET")        //middleware
-	router.HandleFunc("/artwork/{id}", GetArtworkByIdHandler(deps.ArtworkService)).Methods("GET") //middleware
+	router.Handle("/artworks", middleware.RequireAuth(GetArtworksHandler(deps.ArtworkService), []string{"super_admin", "admin", "user"})).Methods("GET")
+	router.Handle("/artwork/{id}", middleware.RequireAuth(GetArtworkByIdHandler(deps.ArtworkService), []string{"super_admin", "admin", "user"})).Methods("GET")
 	router.Handle("/artwork/{id}", middleware.RequireAuth(DeleteArtworkHandler(deps.ArtworkService), []string{"super_admin", "admin", "user"})).Methods("DELETE")
 
 	//bids routes

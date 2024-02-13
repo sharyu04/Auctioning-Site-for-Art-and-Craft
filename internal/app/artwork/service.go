@@ -1,10 +1,10 @@
 package artwork
 
 import (
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/repository"
 )
@@ -29,7 +29,7 @@ func NewService(artworkRepo repository.ArtworkStorer) Service {
 func (as *service) CreateArtwork(artworkDetails dto.CreateArtworkRequest) (repository.Artworks, error) {
 
 	if artworkDetails.Name == "" || artworkDetails.Description == "" || artworkDetails.Image == "" || artworkDetails.Category == "" || artworkDetails.Duration == 0 {
-		return repository.Artworks{}, errors.New("Empty required fields!")
+		return repository.Artworks{}, apperrors.BadRequest{ErrorMsg: "Invalid Credentials"}
 	}
 
 	category, err := as.artworkRepo.GetCategory(artworkDetails.Category)
@@ -63,11 +63,18 @@ func (as *service) GetArtworks(category string, start int, count int) ([]dto.Get
 		if err != nil {
 			return nil, err
 		}
+		if len(artworkList) == 0 {
+			return nil, apperrors.NoContent{ErrorMsg: "No artworks found!"}
+		}
 		return artworkList, nil
+
 	} else {
 		artworkList, err := as.artworkRepo.GetAllArtworks(start, count)
 		if err != nil {
 			return nil, err
+		}
+		if len(artworkList) == 0 {
+			return nil, apperrors.NoContent{ErrorMsg: "No artworks found!"}
 		}
 		return artworkList, nil
 	}
