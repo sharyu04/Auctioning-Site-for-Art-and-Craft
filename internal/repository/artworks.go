@@ -20,21 +20,21 @@ type ArtworkStorer interface {
 }
 
 type Artworks struct {
-	Id             uuid.UUID `db: id`
-	Name           string    `db:name`
-	Description    string    `db:description`
-	Image          string    `db:image`
-	Starting_price float64   `db:starting_price`
-	Category_id    uuid.UUID `db:category_id`
-	Closing_time   time.Time `db:closing_time`
-	Owner_id       uuid.UUID `db:owner_id`
-	Highest_bid    uuid.UUID `db:highest_bid`
-	Created_at     time.Time `db:created_at`
+	Id             uuid.UUID `db:"id"`
+	Name           string    `db:"name"`
+	Description    string    `db:"description"`
+	Image          string    `db:"image"`
+	Starting_price float64   `db:"starting_price"`
+	Category_id    uuid.UUID `db:"category_id"`
+	Closing_time   time.Time `db:"closing_time"`
+	Owner_id       uuid.UUID `db:"owner_id"`
+	Highest_bid    uuid.UUID `db:"highest_bid"`
+	Created_at     time.Time `db:"created_at"`
 }
 
 type Category struct {
-	Id   uuid.UUID `db:id`
-	Name string    `db:name`
+	Id   uuid.UUID `db:"id"`
+	Name string    `db:"name"`
 }
 
 type artworkStore struct {

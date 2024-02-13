@@ -20,18 +20,18 @@ type UserStorer interface {
 }
 
 type User struct {
-	Id         uuid.UUID `db:id`
-	FirstName  string    `db:firstname`
-	LastName   string    `db:lastname`
-	Email      string    `db:email`
-	Password   string    `db:password`
-	Role_id    uuid.UUID `db:role_id`
-	Created_at time.Time `db:created_at`
+	Id         uuid.UUID `db:"id"`
+	FirstName  string    `db:"firstname"`
+	LastName   string    `db:"lastname"`
+	Email      string    `db:"email"`
+	Password   string    `db:"password"`
+	Role_id    uuid.UUID `db:"role_id"`
+	Created_at time.Time `db:"created_at"`
 }
 
 type Role struct {
-	id   uuid.UUID `db:id`
-	name string    `db:name`
+	id   uuid.UUID `db:"id"`
+	name string    `db:"name"`
 }
 
 type userStore struct {

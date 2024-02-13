@@ -3,8 +3,8 @@ package apperrors
 import "net/http"
 
 type res struct {
-	ErrorCode    int
-	ErrorMessage string
+	ErrorCode    int    `json:"error_code"`
+	ErrorMessage string `json:"error_msg"`
 }
 
 func MapError(err error) res {

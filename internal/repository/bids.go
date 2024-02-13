@@ -11,12 +11,12 @@ import (
 )
 
 type Bids struct {
-	Id         uuid.UUID `db:id`
-	Artwork_id uuid.UUID `db:artwork_id`
-	Amount     float64   `db: amount`
-	Status     uuid.UUID `db: status`
-	Bidder_id  uuid.UUID `db: bidder_id`
-	Created_at time.Time `db: created_at`
+	Id         uuid.UUID `db:"id"`
+	Artwork_id uuid.UUID `db:"artwork_id"`
+	Amount     float64   `db:"amount"`
+	Status     uuid.UUID `db:"status"`
+	Bidder_id  uuid.UUID `db:"bidder_id"`
+	Created_at time.Time `db:"created_at"`
 	//updated at
 }
 
@@ -28,8 +28,8 @@ type BidStorer interface {
 }
 
 type BidStatus struct {
-	Id   uuid.UUID `db:id`
-	Name string    `db:name`
+	Id   uuid.UUID `db:"id"`
+	Name string    `db:"name"`
 }
 
 type bidStore struct {
