@@ -14,8 +14,10 @@ func createBidHandler(bidSvc bid.Service) http.HandlerFunc {
 		var req dto.CreateBidRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
@@ -23,19 +25,23 @@ func createBidHandler(bidSvc bid.Service) http.HandlerFunc {
 
 		resBody, err := bidSvc.CreateBid(req)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		resJson, err := json.Marshal(resBody)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
-		w.WriteHeader(http.StatusAccepted)
+		w.WriteHeader(http.StatusOK)
 		w.Write(resJson)
 		return
 	}
@@ -73,7 +79,7 @@ func updateBidHandler(bidSvc bid.Service) http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusAccepted)
+		w.WriteHeader(http.StatusOK)
 		w.Write(resJson)
 		return
 

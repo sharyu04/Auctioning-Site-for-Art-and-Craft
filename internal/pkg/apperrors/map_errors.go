@@ -12,7 +12,7 @@ func MapError(err error) res {
 	case BadRequest:
 		return res{ErrorCode: http.StatusBadRequest, ErrorMessage: err.Error()}
 	case NoContent:
-		return res{ErrorCode: http.StatusNoContent, ErrorMessage: err.Error()}
+		return res{ErrorCode: http.StatusNotFound, ErrorMessage: err.Error()}
 	case UnAuthorizedAccess:
 		return res{ErrorCode: http.StatusUnauthorized, ErrorMessage: err.Error()}
 	default:

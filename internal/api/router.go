@@ -22,6 +22,7 @@ func NewRouter(deps app.Dependencies) mux.Router {
 	router.Handle("/admin/signup", middleware.RequireAuth(createUserHandler(deps.UserService), []string{"super_admin", "admin"})).Methods("POST")
 	router.HandleFunc("/login", loginHandler(deps.UserService)).Methods("POST")
 	router.Handle("/users", middleware.RequireAuth(GetAllUsersHandler(deps.UserService), []string{"admin", "super_admin"})).Methods("Get")
+	router.Handle("/logout", middleware.RequireAuth(logoutHandler(deps.UserService), []string{"super_admin", "admin", "user"})).Methods("POST")
 
 	router.Handle("/check", middleware.RequireAuth(checkHandler, []string{"user", "admin", "super_admin"}))
 

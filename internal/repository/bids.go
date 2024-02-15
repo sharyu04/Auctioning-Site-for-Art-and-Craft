@@ -56,7 +56,7 @@ func (bs *bidStore) CreateBid(bid Bids) (Bids, error) {
 
 	if ownerId == bid.Bidder_id {
 		// err = errors.New("You cannot bid on your own artwork listing")
-		return Bids{}, apperrors.BadRequest{ErrorMsg: "You cannot bid on your own artwork"}
+		return Bids{}, apperrors.BadRequest{ErrorMsg: "Cannot bid on your own artwork"}
 	}
 
 	rows, err = bs.DB.Query("SELECT * FROM bids where artwork_id = $1 and bidder_id = $2", bid.Artwork_id, bid.Bidder_id)

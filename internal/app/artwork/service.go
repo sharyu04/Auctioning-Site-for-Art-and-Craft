@@ -1,6 +1,7 @@
 package artwork
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -63,7 +64,9 @@ func (as *service) GetArtworks(category string, start int, count int) ([]dto.Get
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println(len(artworkList))
 		if len(artworkList) == 0 {
+			fmt.Println("in 69")
 			return nil, apperrors.NoContent{ErrorMsg: "No artworks found!"}
 		}
 		return artworkList, nil

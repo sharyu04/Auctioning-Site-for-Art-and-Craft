@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -70,8 +71,12 @@ func GetArtworksHandler(artworkSvc artwork.Service) http.HandlerFunc {
 
 		if err != nil {
 			errResponse := apperrors.MapError(err)
+			fmt.Printf("errResponse %+v", errResponse)
 			w.WriteHeader(errResponse.ErrorCode)
-			res, _ := json.Marshal(errResponse)
+			res, err := json.Marshal(errResponse)
+			if err != nil {
+				fmt.Printf("errResponse 78%+v", err)
+			}
 			w.Write(res)
 			return
 		}

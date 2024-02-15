@@ -118,3 +118,49 @@ func TestLoginHandler(t *testing.T) {
 		})
 	}
 }
+
+func TestGetAllUsersHandler(t *testing.T) {
+	userSvc := mocks.NewService(t)
+	GetAllUsersHandler := GetAllUsersHandler(userSvc)
+
+	tests := []struct {
+		name               string
+		start              int
+		count              int
+		role               string
+		setup              func(mock *mocks.Service)
+		expectedStatusCode int
+	}{
+		{
+			name:  "Success for get all users",
+			start: 0,
+			count: 4,
+			setup: func(mockSvc *mocks.Service) {
+				mockSvc.On("GetAllUsers", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil).Once()
+			},
+			expectedStatusCode: http.StatusOK,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.setup(userSvc)
+
+			req, err := http.NewRequest("GET", fmt.Sprintf("/users?start=%d&count=%d&role=%s", test.start, test.count, test.role), bytes.NewBuffer([]byte("")))
+			if err != nil {
+				t.Fatal(err)
+				return
+			}
+
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(GetAllUsersHandler)
+			handler.ServeHTTP(rr, req)
+
+			fmt.Println("Error")
+
+			if rr.Result().StatusCode != test.expectedStatusCode {
+				t.Errorf("Expected %d but got %d", test.expectedStatusCode, rr.Result().StatusCode)
+			}
+		})
+	}
+}

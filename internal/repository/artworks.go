@@ -163,7 +163,7 @@ func (as *artworkStore) GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkRespo
 	}
 
 	if i == 0 {
-		errMsg := fmt.Sprintf("Artworks not found with id: %v", artworkId)
+		errMsg := fmt.Sprintf("Artwork not found with id: %v", artworkId)
 		return dto.GetArtworkResponse{}, apperrors.BadRequest{ErrorMsg: errMsg}
 	}
 	return a, nil

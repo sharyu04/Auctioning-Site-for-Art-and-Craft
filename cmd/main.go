@@ -11,6 +11,7 @@ import (
 
 func main() {
 	db, err := repository.InitializeDb()
+	// Port := 8080
 	if err != nil {
 		panic(err)
 	} else {
@@ -21,6 +22,5 @@ func main() {
 	sevices := app.NewServices(db)
 
 	router := api.NewRouter(sevices)
-
 	http.ListenAndServe("localhost:8080", &router)
 }

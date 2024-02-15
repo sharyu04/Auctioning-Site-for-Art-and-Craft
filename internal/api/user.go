@@ -45,7 +45,6 @@ func createUserHandler(userSvc user.Service) http.HandlerFunc {
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(respJson)
-		return
 	}
 }
 
@@ -91,10 +90,30 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 		resBody := map[string]string{
 			"auth-token": token,
 		}
-		res, err := json.Marshal(resBody)
+		res, _ := json.Marshal(resBody)
 		w.WriteHeader(http.StatusOK)
 		w.Write(res)
-		return
+	}
+}
+
+func logoutHandler(userSvc user.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		cookie := http.Cookie{}
+		cookie.Name = "accessToken"
+		cookie.Value = ""
+		cookie.Expires = time.Now()
+		cookie.Secure = false
+		cookie.HttpOnly = true
+		cookie.Path = "/"
+		http.SetCookie(w, &cookie)
+
+		resBody := map[string]string{
+			"Response": "Logout successful!",
+		}
+		res, _ := json.Marshal(resBody)
+		w.WriteHeader(http.StatusOK)
+		w.Write(res)
 	}
 }
 
@@ -136,7 +155,6 @@ func GetAllUsersHandler(userSvc user.Service) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusOK)
 		w.Write(resBody)
-		return
 
 	}
 }

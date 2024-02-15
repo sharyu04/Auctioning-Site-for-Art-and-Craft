@@ -66,6 +66,14 @@ func (bs *service) CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bi
 }
 
 func (bs *service) UpdateBid(updateRequest dto.UpdateBidRequest, bidder_id string) (repository.Bids, error) {
+	if updateRequest.ArtworkId == "" || updateRequest.Amount == 0 {
+		return repository.Bids{}, apperrors.BadRequest{ErrorMsg: "Invalid Input"}
+	}
+
+	if bidder_id == "" {
+		return repository.Bids{}, apperrors.UnAuthorizedAccess{ErrorMsg: "No user logged in!"}
+	}
+
 	highestBid, _, err := bs.bidRepo.GetHighestBid(updateRequest.ArtworkId)
 	if err != nil {
 		return repository.Bids{}, err
