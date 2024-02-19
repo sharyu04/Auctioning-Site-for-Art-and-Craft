@@ -1,0 +1,365 @@
+{
+	"info": {
+		"_postman_id": "da3b99c1-7314-4984-b9ff-ad1ea4e04ffe",
+		"name": "Auction Website",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32859317",
+		"_collection_link": "https://winter-star-638305.postman.co/workspace/My-Workspace~0a063afc-9360-477d-8218-88fa8831b343/collection/32859317-da3b99c1-7314-4984-b9ff-ad1ea4e04ffe?action=share&source=collection_link&creator=32859317"
+	},
+	"item": [
+		{
+			"name": "localhost:8080/user/signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"first_name\" : \"Bidder\",\n\t\"last_name\" : \"One\",\n\t\"email\": \"bidder1@gmail.com\",\n\t\"password\": \"Root$1234\" \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/user/signup",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/bid/create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"artwork_id\": \"82d1a7d4-1cd4-4776-a4c5-9677dd8cd743\",\n\t\"amount\":  25000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/bid/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"bid",
+						"create"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "localhost:8080/artwork/create",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\":           \"Iron Man Painting\",\n\t\"Description\"    : \"This is an Iron Man Canvas Painting\",\n\t\"Image\":          \"https://c4.wallpaperflare.com/wallpaper/889/503/640/iron-man-painting-nano-suit-artwork-wallpaper-preview.jpg\",\n\t\"Starting_price\": 10000,\n\t\"Live_period\":    \"1 hour\",\n\t\"Owner_id\": \"b2d9b4e7-45bd-4d9e-9e71-0ae3e52271d8\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/artwork/create",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"artwork",
+								"create"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 09 Feb 2024 06:27:24 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "513"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/plain; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\"Id\":\"aad31bca-7d9c-4949-b8ec-3ddc922ffbe9\",\"Name\":\"Iron Man Painting\",\"Description\":\"This is an Iron Man Canvas Painting\",\"Image\":\"https://c4.wallpaperflare.com/wallpaper/889/503/640/iron-man-painting-nano-suit-artwork-wallpaper-preview.jpg\",\"Starting_price\":10000,\"Category_id\":\"aa63a3bd-0efe-4663-a002-dfad8353dcc8\",\"Live_period\":\"1 hour\",\"Status\":\"open\",\"Owner_id\":\"b2d9b4e7-45bd-4d9e-9e71-0ae3e52271d8\",\"Highest_bid\":\"00000000-0000-0000-0000-000000000000\",\"Created_at\":\"2024-02-09T11:57:24.030682634+05:30\"}"
+				}
+			]
+		},
+		{
+			"name": "localhost:8080/artworks?start=0&count=0&category=Canvas_Painting",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/artworks?start=0&count=4?category=Canvas_painting",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"artworks"
+					],
+					"query": [
+						{
+							"key": "start",
+							"value": "0"
+						},
+						{
+							"key": "count",
+							"value": "4?category=Canvas_painting"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/artwork/118fc7bd-655e-467b-b712-79e37b14e238",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/artwork/6b6ceb80-e145-42d3-80d0-fa6eb87f92a0",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"artwork",
+						"6b6ceb80-e145-42d3-80d0-fa6eb87f92a0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/check",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"bidder1@gmail.com\",\n    \"password\":\"Root$1234\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/login",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/artwork/create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"Seller1's test2 painting\",\n\t\"description\": \"This is seller 1's second Painting\",\n\t\"image\":\"https://c4.wallpaperflare.com/wallpaper/889/503/640/iron-man-painting-nano-suit-artwork-wallpaper-preview.jpg\",\n\t\"starting_price\": 10000,\n\t\"duration\":2,\n    \"category\":\"Pencil_At\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/artwork/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"artwork",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/admin/signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"first_name\" : \"Admin\",\n\t\"last_name\" : \"One\",\n\t\"email\": \"admin1@gmail.com\",\n\t\"password\": \"Root$1234\" \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/admin/signup",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/bid/update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"artwork_id\": \"82d1a7d4-1cd4-4776-a4c5-9677dd8cd743\",\n    \"amount\":28000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/bid/update",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"bid",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/artwork/bad1939f-a97e-4916-8249-733b74c9152a",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/artwork/0fa85c48-342c-4566-a547-17d3af9ad822",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"artwork",
+						"0fa85c48-342c-4566-a547-17d3af9ad822"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/users?start=0&count=9",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/users?start=3&count=5?role=\"admin\"",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users"
+					],
+					"query": [
+						{
+							"key": "start",
+							"value": "3"
+						},
+						{
+							"key": "count",
+							"value": "5?role=\"admin\""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/users?start=0&count=10",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/users?start=0&count=10",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users"
+					],
+					"query": [
+						{
+							"key": "start",
+							"value": "0"
+						},
+						{
+							"key": "count",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,42 @@
+create table role(id uuid primary key, name varchar);
+
+create table users(id uuid primary key, firstname varchar, lastname varchar, email varchar, password varchar
+, role_id uuid, created_at time, foreign key(role_id) references role(id));
+
+create table category(id uuid primary key, name varchar);
+
+create table bidStatus(id uuid primary key, name varchar);
+
+create table bids(id uuid primary key, artwork_id uuid, amount DOUBLE PRECISION, status uuid, bidder_id uuid
+,foreign key(bidder_id) references users(id), created_at time);
+
+create table artworks(id uuid, highest_bid uuid, name varchar, image varchar,starting_price double precision, category_id uuid, live_period time, status varchar, owner_id uuid, created_at time, foreign key(highest_bid) references bids(id), primary key(id), foreign key(owner_id) references users(id));
+
+alter table artworks add description varchar;
+
+alter table bids add foreign key(artwork_id) references artworks(id);
+
+Insert into category(id, name) values(gen_random_uuid(),'Canvas Painting');
+
+alter table artworks alter column live_period type varchar;
+
+insert into bidstatus(id, name) values(gen_random_uuid(),'live');
+
+insert into bidstatus(id, name) values(gen_random_uuid(),'accepted');
+
+insert into bidstatus(id, name) values(gen_random_uuid(),'rejected');
+
+alter table artworks rename column live_period to closing_time;
+
+alter table artworks drop column status;
+
+TRUNCATE artworks CASCADE;
+
+select bids.amount, artworks.* , category.name from (select artworks.* , category.name from artworks inner join category on artworks.category_id = category.id where category.name = 'Canvas Painting') inner join bids on artwroks.highest_bid = bids.id LIMIT 3 OFFSET 0;
+
+select artworks.*, category.name, bids.amount
+from artworks 
+inner join category on artworks.category_id = category.id
+inner join bids on artworks.highest_bid=bids.id;
+
+insert into role(id, name) values(gen_random_uuid(),'admin');
