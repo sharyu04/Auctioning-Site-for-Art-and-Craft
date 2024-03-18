@@ -102,6 +102,9 @@ func (us *service) CreateUser(userDetails dto.CreateUserRequest, role string) (d
 	if role == "" {
 		role = "user"
 	}
+    if role == "super_admin"{
+        role = "admin"
+    }
 	userInfo.Role_id, err = us.userRepo.GetRoleID(role)
 	if err != nil {
 		return dto.UserSignupResponse{}, err
