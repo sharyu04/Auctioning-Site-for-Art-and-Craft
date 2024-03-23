@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/api"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/repository"
@@ -22,5 +23,13 @@ func main() {
 	sevices := app.NewServices(db)
 
 	router := api.NewRouter(sevices)
-	http.ListenAndServe("localhost:8080", &router)
+
+	cors := handlers.CORS(
+        handlers.AllowedHeaders([]string{"*"}),
+        handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+        handlers.AllowedOrigins([]string{"*"}),
+    )
+
+    http.ListenAndServe(":8080", cors(&router))
+	
 }

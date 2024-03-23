@@ -47,6 +47,7 @@ func NewUserRepo(db *sqlx.DB) UserStorer {
 func (us *userStore) CheckEmailExists(user User) error {
 	rows, err := us.DB.Query("Select * from  users where email=$1", user.Email)
 	if err != nil {
+		fmt.Println(rows,err)
 		return err
 	}
 
