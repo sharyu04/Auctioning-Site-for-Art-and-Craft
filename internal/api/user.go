@@ -81,7 +81,7 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 		cookie := http.Cookie{}
 		cookie.Name = "accessToken"
 		cookie.Value = token
-		cookie.Expires = time.Now().Add(time.Minute * 5)
+		cookie.Expires = time.Now().Add(time.Minute * 60)
 		cookie.Secure = false
 		cookie.HttpOnly = true
 		cookie.Path = "/"
