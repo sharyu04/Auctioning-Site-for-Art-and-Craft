@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"slices"
-
+	
 	"github.com/golang-jwt/jwt"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
@@ -19,7 +19,7 @@ func RequireAuth(next http.Handler, roles []string) http.Handler {
 		if err != nil {
 			if err == http.ErrNoCookie {
 				err = apperrors.UnAuthorizedAccess{ErrorMsg: "Unauthorized, Auth Token not found!"}
-				errResponse := apperrors.MapError(err)
+							errResponse := apperrors.MapError(err)
 				w.WriteHeader(errResponse.ErrorCode)
 				res, _ := json.Marshal(errResponse)
 				w.Write(res)

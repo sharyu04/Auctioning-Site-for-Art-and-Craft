@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/user"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
@@ -78,35 +77,32 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		cookie := http.Cookie{}
-		cookie.Name = "accessToken"
-		cookie.Value = token
-		cookie.Expires = time.Now().Add(time.Minute * 60)
-		cookie.Secure = false
-		cookie.HttpOnly = true
-		cookie.Path = "/"
-		http.SetCookie(w, &cookie)
+		cookie := http.Cookie{ 
+			Name: "accessToken",
+			Value: token,
+			SameSite:http.SameSiteLaxMode,
+            Path: "/",
+			MaxAge:1000,
+			HttpOnly:true,
+			Secure:false,
+		}
 
+		http.SetCookie(w, &cookie)
+ 
 		resBody := map[string]string{
 			"auth-token": token,
 		}
+		
 		res, _ := json.Marshal(resBody)
 		w.WriteHeader(http.StatusOK)
-		w.Write(res)
+w.Write(res)
 	}
 }
 
 func logoutHandler(userSvc user.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		cookie := http.Cookie{}
-		cookie.Name = "accessToken"
-		cookie.Value = ""
-		cookie.Expires = time.Now()
-		cookie.Secure = false
-		cookie.HttpOnly = true
-		cookie.Path = "/"
-		http.SetCookie(w, &cookie)
+
 
 		resBody := map[string]string{
 			"Response": "Logout successful!",
