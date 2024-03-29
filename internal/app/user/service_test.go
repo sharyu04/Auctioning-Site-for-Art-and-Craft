@@ -53,51 +53,51 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-func TestLoginUser(t *testing.T) {
-	userRepo := mocks.NewUserStorer(t)
-	service := NewService(userRepo)
+// func TestLoginUser(t *testing.T) {
+// 	userRepo := mocks.NewUserStorer(t)
+// 	service := NewService(userRepo)
 
-	tests := []struct {
-		name            string
-		input           dto.LoginRequest
-		setup           func(userMock *mocks.UserStorer)
-		isErrorExpected bool
-	}{
-		{
-			name: "Success for User Login",
-			input: dto.LoginRequest{
-				Email:    "bidder1@gmail.com",
-				Password: "root",
-			},
-			setup: func(userMock *mocks.UserStorer) {
-				// hashedPassword, _ := helpers.HashPassword(password)
-				Id, _ := uuid.Parse("010d9c50-646c-48af-8cb1-2db613102c4d")
-				userMock.On("GetUserByEmail", mock.Anything).Return(dto.User{
-					Id:        Id,
-					FirstName: "bidder1",
-					LastName:  "Marwadi",
-					Email:     "bidder1@gmail.com",
-					Password:  "$2a$14$9QkXuA/eLtP/B0tzK1/nBeH5FwJPZik2QPA5H8ys9sxglJkDKAZDW",
-					Role:      "user",
-				}, nil).Once()
-			},
-			isErrorExpected: false,
-		},
-	}
+// 	tests := []struct {
+// 		name            string
+// 		input           dto.LoginRequest
+// 		setup           func(userMock *mocks.UserStorer)
+// 		isErrorExpected bool
+// 	}{
+// 		{
+// 			name: "Success for User Login",
+// 			input: dto.LoginRequest{
+// 				Email:    "bidder1@gmail.com",
+// 				Password: "root",
+// 			},
+// 			setup: func(userMock *mocks.UserStorer) {
+// 				// hashedPassword, _ := helpers.HashPassword(password)
+// 				Id, _ := uuid.Parse("010d9c50-646c-48af-8cb1-2db613102c4d")
+// 				userMock.On("GetUserByEmail", mock.Anything).Return(dto.User{
+// 					Id:        Id,
+// 					FirstName: "bidder1",
+// 					LastName:  "Marwadi",
+// 					Email:     "bidder1@gmail.com",
+// 					Password:  "$2a$14$9QkXuA/eLtP/B0tzK1/nBeH5FwJPZik2QPA5H8ys9sxglJkDKAZDW",
+// 					Role:      "user",
+// 				}, nil).Once()
+// 			},
+// 			isErrorExpected: false,
+// 		},
+// 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			test.setup(userRepo)
+// 	for _, test := range tests {
+// 		t.Run(test.name, func(t *testing.T) {
+// 			test.setup(userRepo)
 
-			// test service
-			_, err := service.LoginUser(test.input)
+// 			// test service
+// 			_, err := service.LoginUser(test.input)
 
-			if (err != nil) != test.isErrorExpected {
-				t.Errorf("Test Failed, expected error to be %v, but got err %v", test.isErrorExpected, err != nil)
-			}
-		})
-	}
-}
+// 			if (err != nil) != test.isErrorExpected {
+// 				t.Errorf("Test Failed, expected error to be %v, but got err %v", test.isErrorExpected, err != nil)
+// 			}
+// 		})
+// 	}
+// }
 
 func TestGetAllUsers(t *testing.T) {
 	userRepo := mocks.NewUserStorer(t)

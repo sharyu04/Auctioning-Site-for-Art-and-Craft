@@ -21,7 +21,7 @@ type service struct {
 
 type Service interface {
 	CreateUser(userDetails dto.CreateUserRequest, role string) (dto.UserSignupResponse, error)
-	LoginUser(credentials dto.LoginRequest) (string, error)
+	LoginUser(credentials dto.LoginRequest) (string, uuid.UUID, string, error)
 	GetAllUsers(start, count int, role string) ([]dto.GetAllUserResponse, error)
 }
 
@@ -102,9 +102,9 @@ func (us *service) CreateUser(userDetails dto.CreateUserRequest, role string) (d
 	if role == "" {
 		role = "user"
 	}
-    if role == "super_admin"{
-        role = "admin"
-    }
+	if role == "super_admin" {
+		role = "admin"
+	}
 	userInfo.Role_id, err = us.userRepo.GetRoleID(role)
 	if err != nil {
 		return dto.UserSignupResponse{}, err
@@ -113,18 +113,18 @@ func (us *service) CreateUser(userDetails dto.CreateUserRequest, role string) (d
 	return us.userRepo.CreateUser(userInfo)
 }
 
-func (us *service) LoginUser(credentials dto.LoginRequest) (string, error) {
+func (us *service) LoginUser(credentials dto.LoginRequest) (string, uuid.UUID, string, error) {
 
 	expirationTime := time.Now().Add(time.Minute * 5)
 
 	user, err := us.userRepo.GetUserByEmail(credentials.Email)
 	if err != nil {
-		return "", err
+		return "", uuid.Nil, "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password))
 	if err != nil {
-		return "", apperrors.BadRequest{ErrorMsg: "Invalid Credentials"}
+		return "", uuid.Nil, "", apperrors.BadRequest{ErrorMsg: "Invalid Credentials"}
 	}
 
 	claims := &dto.Claims{
@@ -141,10 +141,10 @@ func (us *service) LoginUser(credentials dto.LoginRequest) (string, error) {
 	tokenString, err := token.SignedString(jwtKey)
 
 	if err != nil {
-		return "", err
+		return "", uuid.Nil, "", err
 	}
 
-	return tokenString, nil
+	return tokenString, user.Id, user.Role, nil
 }
 
 func (us *service) GetAllUsers(start, count int, role string) ([]dto.GetAllUserResponse, error) {

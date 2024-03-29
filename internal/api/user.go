@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/user"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
@@ -47,6 +48,12 @@ func createUserHandler(userSvc user.Service) http.HandlerFunc {
 	}
 }
 
+type resBody struct {
+	token  string
+	userId uuid.UUID
+	role   string
+}
+
 func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req dto.LoginRequest
@@ -68,7 +75,7 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		token, err := userSvc.LoginUser(req)
+		token, usesrId, userRole, err := userSvc.LoginUser(req)
 		if err != nil {
 			errResponse := apperrors.MapError(err)
 			w.WriteHeader(errResponse.ErrorCode)
@@ -77,32 +84,36 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		cookie := http.Cookie{ 
-			Name: "accessToken",
-			Value: token,
-			SameSite:http.SameSiteLaxMode,
-            Path: "/",
-			MaxAge:1000,
-			HttpOnly:true,
-			Secure:false,
+		cookie := http.Cookie{
+			Name:     "accessToken",
+			Value:    token,
+			SameSite: http.SameSiteLaxMode,
+			Path:     "/",
+			MaxAge:   1000,
+			HttpOnly: true,
+			Secure:   false,
 		}
 
 		http.SetCookie(w, &cookie)
- 
-		resBody := map[string]string{
-			"auth-token": token,
+
+		// resBody := map[string]string{
+		// 	"auth-token": token,
+		// }
+
+		resBody := resBody{
+			token:  token,
+			userId: usesrId,
+			role:   userRole,
 		}
-		
+
 		res, _ := json.Marshal(resBody)
 		w.WriteHeader(http.StatusOK)
-w.Write(res)
+		w.Write(res)
 	}
 }
 
 func logoutHandler(userSvc user.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-
 
 		resBody := map[string]string{
 			"Response": "Logout successful!",
