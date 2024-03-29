@@ -48,10 +48,10 @@ func createUserHandler(userSvc user.Service) http.HandlerFunc {
 	}
 }
 
-type resBody struct {
-	token  string
-	userId uuid.UUID
-	role   string
+type ResBodyStruct struct {
+	Token  string    `json:"token"`
+	UserId uuid.UUID `json:"userId"`
+	Role   string    `json:"role"`
 }
 
 func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +75,8 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		token, usesrId, userRole, err := userSvc.LoginUser(req)
+		token, userId, userRole, err := userSvc.LoginUser(req)
+
 		if err != nil {
 			errResponse := apperrors.MapError(err)
 			w.WriteHeader(errResponse.ErrorCode)
@@ -100,13 +101,17 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 		// 	"auth-token": token,
 		// }
 
-		resBody := resBody{
-			token:  token,
-			userId: usesrId,
-			role:   userRole,
+		resBody := ResBodyStruct{
+			Token:  token,
+			UserId: userId,
+			Role:   userRole,
 		}
 
-		res, _ := json.Marshal(resBody)
+		res, err := json.Marshal(resBody)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(res)
 	}

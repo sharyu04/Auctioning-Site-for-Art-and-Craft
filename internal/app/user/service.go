@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"time"
 	"unicode"
@@ -139,6 +140,7 @@ func (us *service) LoginUser(credentials dto.LoginRequest) (string, uuid.UUID, s
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
+	fmt.Println(tokenString)
 
 	if err != nil {
 		return "", uuid.Nil, "", err
