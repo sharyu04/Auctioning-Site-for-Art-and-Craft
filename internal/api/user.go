@@ -90,7 +90,7 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 			Value:    token,
 			SameSite: http.SameSiteLaxMode,
 			Path:     "/",
-			MaxAge:   1000,
+			MaxAge:   20000,
 			HttpOnly: true,
 			Secure:   false,
 		}

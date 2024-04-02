@@ -116,7 +116,7 @@ func (us *service) CreateUser(userDetails dto.CreateUserRequest, role string) (d
 
 func (us *service) LoginUser(credentials dto.LoginRequest) (string, uuid.UUID, string, error) {
 
-	expirationTime := time.Now().Add(time.Minute * 360)
+	expirationTime := time.Now().Add(time.Hour * 5)
 
 	user, err := us.userRepo.GetUserByEmail(credentials.Email)
 	if err != nil {
