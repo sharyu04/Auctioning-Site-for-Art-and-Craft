@@ -16,7 +16,7 @@ type service struct {
 
 type Service interface {
 	CreateArtwork(artworkDetails dto.CreateArtworkRequest) (repository.Artworks, error)
-	GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, error)
+	GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, int, error)
 	GetArtworkByID(id string) (dto.GetArtworkResponse, error)
 	DeleteArtworkById(id string, owner_id string, role string) error
 }
@@ -52,34 +52,34 @@ func (as *service) CreateArtwork(artworkDetails dto.CreateArtworkRequest) (repos
 	return as.artworkRepo.CreateArtwork(artworkInfo)
 }
 
-func (as *service) GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, error) {
+func (as *service) GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, int, error) {
 
 	if category != "" {
 		_, err := as.artworkRepo.GetCategory(category)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
-		artworkList, err := as.artworkRepo.GetFilterArtworks(category, start, count)
+		artworkList, totalCount, err := as.artworkRepo.GetFilterArtworks(category, start, count)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		fmt.Println(len(artworkList))
 		if len(artworkList) == 0 {
 			fmt.Println("in 69")
-			return nil, apperrors.NoContent{ErrorMsg: "No artworks found!"}
+			return nil, 0, apperrors.NoContent{ErrorMsg: "No artworks found!"}
 		}
-		return artworkList, nil
+		return artworkList, totalCount, nil
 
 	} else {
-		artworkList, err := as.artworkRepo.GetAllArtworks(start, count)
+		artworkList, totalCount, err := as.artworkRepo.GetAllArtworks(start, count)
 		if err != nil {
-			return nil, err
+			return nil, totalCount, err
 		}
 		if len(artworkList) == 0 {
-			return nil, apperrors.NoContent{ErrorMsg: "No artworks found!"}
+			return nil, totalCount, apperrors.NoContent{ErrorMsg: "No artworks found!"}
 		}
-		return artworkList, nil
+		return artworkList, totalCount, nil
 	}
 
 }

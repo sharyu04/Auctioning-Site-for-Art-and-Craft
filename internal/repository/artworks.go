@@ -13,8 +13,8 @@ import (
 type ArtworkStorer interface {
 	CreateArtwork(artwork Artworks) (Artworks, error)
 	GetCategory(categoryName string) (Category, error)
-	GetAllArtworks(start, count int) ([]dto.GetArtworkResponse, error)
-	GetFilterArtworks(category string, start, count int) ([]dto.GetArtworkResponse, error)
+	GetAllArtworks(start, count int) ([]dto.GetArtworkResponse, int, error)
+	GetFilterArtworks(category string, start, count int) ([]dto.GetArtworkResponse, int, error)
 	GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkResponse, error)
 	DeleteArtworkById(artworkId uuid.UUID, ownerId uuid.UUID, role string) error
 }
@@ -83,50 +83,68 @@ func (as *artworkStore) GetCategory(categoryName string) (Category, error) {
 
 }
 
-func (as *artworkStore) GetAllArtworks(start, count int) ([]dto.GetArtworkResponse, error) {
+func (as *artworkStore) GetAllArtworks(start, count int) ([]dto.GetArtworkResponse, int, error) {
 	artworks := []dto.GetArtworkResponse{}
+	totalRows, err := as.DB.Query("select count(*) from artworks")
+	if err != nil {
+		return artworks, 0, err
+	}
+	totalCount := 0
+	for totalRows.Next() {
+		err = totalRows.Scan(&totalCount)
+		fmt.Println("TotalCount", totalCount)
+	}
 	row, err := as.DB.Query("select artworks.id, artworks.name, artworks.description, artworks.image, artworks.starting_price, category.name, artworks.closing_time, artworks.owner_id, artworks.created_at, artworks.highest_bid from artworks inner join category on artworks.category_id = category.id LIMIT $1 OFFSET $2", count, start)
 	if err != nil {
-		return artworks, err
+		return artworks, 0, err
 	}
 	defer row.Close()
 	for row.Next() {
 		var a dto.GetArtworkResponse
 		var highest_bid uuid.UUID
 		if err := row.Scan(&a.Id, &a.Name, &a.Description, &a.Image, &a.Starting_price, &a.Category, &a.Closing_time, &a.Owner_id, &a.Created_at, &highest_bid); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		if highest_bid != uuid.Nil {
 			err := as.DB.QueryRow("SELECT amount FROM bids where bids.id = $1", highest_bid).Scan(&a.Highest_bid)
 			if err != nil {
-				return []dto.GetArtworkResponse{}, err
+				return []dto.GetArtworkResponse{}, 0, err
 			}
 		} else {
 			a.Highest_bid = 0
 		}
 		artworks = append(artworks, a)
 	}
-	return artworks, nil
+	return artworks, totalCount, nil
 
 }
 
-func (as *artworkStore) GetFilterArtworks(category string, start, count int) ([]dto.GetArtworkResponse, error) {
+func (as *artworkStore) GetFilterArtworks(category string, start, count int) ([]dto.GetArtworkResponse, int, error) {
 	artworks := []dto.GetArtworkResponse{}
+	totalRows, err := as.DB.Query("select count(*) from artworks")
+	if err != nil {
+		return artworks, 0, err
+	}
+	totalCount := 0
+	for totalRows.Next() {
+		err = totalRows.Scan(&totalCount)
+		fmt.Println("TotalCount", totalCount)
+	}
 	row, err := as.DB.Query("select artworks.id, artworks.name, artworks.description, artworks.image, artworks.starting_price, category.name, artworks.closing_time, artworks.owner_id, artworks.created_at, artworks.highest_bid from artworks inner join category on artworks.category_id = category.id where category.name = $1 LIMIT $2 OFFSET $3", category, count, start)
 	if err != nil {
-		return artworks, err
+		return artworks, 0, err
 	}
 	defer row.Close()
 	for row.Next() {
 		var a dto.GetArtworkResponse
 		var highest_bid uuid.UUID
 		if err := row.Scan(&a.Id, &a.Name, &a.Description, &a.Image, &a.Starting_price, &a.Category, &a.Closing_time, &a.Owner_id, &a.Created_at, &highest_bid); err != nil {
-			return []dto.GetArtworkResponse{}, err
+			return []dto.GetArtworkResponse{}, 0, err
 		}
 		if highest_bid != uuid.Nil {
 			err := as.DB.QueryRow("SELECT amount FROM bids where bids.id = $1", highest_bid).Scan(&a.Highest_bid)
 			if err != nil {
-				return []dto.GetArtworkResponse{}, err
+				return []dto.GetArtworkResponse{}, 0, err
 			}
 		} else {
 			a.Highest_bid = 0
@@ -134,7 +152,7 @@ func (as *artworkStore) GetFilterArtworks(category string, start, count int) ([]
 		artworks = append(artworks, a)
 	}
 
-	return artworks, nil
+	return artworks, totalCount, nil
 
 }
 

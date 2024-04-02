@@ -49,6 +49,11 @@ func createArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	}
 }
 
+type resp struct {
+	RespData   []dto.GetArtworkResponse `json:"respBody"`
+	TotalCount int                      `json:"totalCount"`
+}
+
 func GetArtworksHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		category := r.URL.Query().Get("category")
@@ -67,7 +72,8 @@ func GetArtworksHandler(artworkSvc artwork.Service) http.HandlerFunc {
 		startInt, _ := strconv.Atoi(start)
 		countInt, _ := strconv.Atoi(count)
 
-		res, err := artworkSvc.GetArtworks(category, startInt, countInt)
+		res, totalCount, err := artworkSvc.GetArtworks(category, startInt, countInt)
+		fmt.Println("totalCount = ", totalCount)
 
 		if err != nil {
 			errResponse := apperrors.MapError(err)
@@ -81,7 +87,15 @@ func GetArtworksHandler(artworkSvc artwork.Service) http.HandlerFunc {
 			return
 		}
 
-		resBody, err := json.Marshal(res)
+		respBody := resp{
+			RespData:   res,
+			TotalCount: totalCount,
+		}
+
+		fmt.Println(respBody)
+
+		resBody, err := json.Marshal(respBody)
+
 		if err != nil {
 			errResponse := apperrors.MapError(err)
 			w.WriteHeader(errResponse.ErrorCode)
