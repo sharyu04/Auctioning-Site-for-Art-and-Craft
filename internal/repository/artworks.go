@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -49,11 +50,27 @@ func (as *artworkStore) CreateArtwork(artwork Artworks) (Artworks, error) {
 	artwork.Id = uuid.New()
 	artwork.Created_at = time.Now()
 
-	err := as.DB.QueryRow("INSERT INTO artworks(id, name, image, starting_price, category_id, closing_time, owner_id, created_at, description) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
-		artwork.Id, artwork.Name, artwork.Image, artwork.Starting_price, artwork.Category_id, artwork.Closing_time, artwork.Owner_id, artwork.Created_at, artwork.Description).Scan(&artwork.Id)
-
+	ctx := context.Background()
+	tx, err := as.DB.BeginTxx(ctx, nil)
 	if err != nil {
 		return Artworks{}, err
+	}
+	_, err = tx.ExecContext(ctx, "INSERT INTO artworks(id, name, image, starting_price, category_id, closing_time, owner_id, created_at, description) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+		artwork.Id, artwork.Name, artwork.Image, artwork.Starting_price, artwork.Category_id, artwork.Closing_time, artwork.Owner_id, artwork.Created_at, artwork.Description)
+
+	// err = as.DB.QueryRow("INSERT INTO artworks(id, name, image, starting_price, category_id, closing_time, owner_id, created_at, description) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
+	// artwork.Id, artwork.Name, artwork.Image, artwork.Starting_price, artwork.Category_id, artwork.Closing_time, artwork.Owner_id, artwork.Created_at, artwork.Description).Scan(&artwork.Id)
+
+	if err != nil {
+		tx.Rollback()
+		return Artworks{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return Artworks{}, err
+	} else {
+		fmt.Println("Transaction commited successfully")
 	}
 	return artwork, nil
 }
