@@ -28,3 +28,8 @@ type GetArtworkResponse struct {
 	Highest_bid    int       `db:"highest_bid"`
 	Created_at     time.Time `db:"created_at"`
 }
+
+type Resp struct {
+	RespData   []GetArtworkResponse `json:"respBody"`
+	TotalCount int                  `json:"totalCount"`
+}

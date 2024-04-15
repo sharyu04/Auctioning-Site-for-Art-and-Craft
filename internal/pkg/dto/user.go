@@ -52,3 +52,9 @@ type GetAllUserResponse struct {
 	RoleID    string    `json:"role_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type ResBodyStruct struct {
+	Token  string    `json:"token"`
+	UserId uuid.UUID `json:"userId"`
+	Role   string    `json:"role"`
+}

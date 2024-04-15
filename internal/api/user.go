@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/google/uuid"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/app/user"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/apperrors"
 	"github.com/sharyu04/Auctioning-Site-for-Art-and-Craft/internal/pkg/dto"
@@ -46,12 +45,6 @@ func createUserHandler(userSvc user.Service) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		w.Write(respJson)
 	}
-}
-
-type ResBodyStruct struct {
-	Token  string    `json:"token"`
-	UserId uuid.UUID `json:"userId"`
-	Role   string    `json:"role"`
 }
 
 func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +94,7 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 		// 	"auth-token": token,
 		// }
 
-		resBody := ResBodyStruct{
+		resBody := dto.ResBodyStruct{
 			Token:  token,
 			UserId: userId,
 			Role:   userRole,
@@ -117,7 +110,7 @@ func loginHandler(userSvc user.Service) func(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func logoutHandler(userSvc user.Service) http.HandlerFunc {
+func logoutHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		resBody := map[string]string{

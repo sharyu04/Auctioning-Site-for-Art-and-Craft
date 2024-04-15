@@ -49,10 +49,6 @@ func createArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	}
 }
 
-type resp struct {
-	RespData   []dto.GetArtworkResponse `json:"respBody"`
-	TotalCount int                      `json:"totalCount"`
-}
 
 func GetArtworksHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +83,7 @@ func GetArtworksHandler(artworkSvc artwork.Service) http.HandlerFunc {
 			return
 		}
 
-		respBody := resp{
+		respBody := dto.Resp{
 			RespData:   res,
 			TotalCount: totalCount,
 		}
