@@ -37,6 +37,10 @@ func NewRouter(deps app.Dependencies) mux.Router {
 	router.Handle("/bid/update", middleware.RequireAuth(updateBidHandler(deps.BidService), []string{"user"})).Methods("PUT")
 	router.Handle("/bid/delete", middleware.RequireAuth(deleteBidHandler(deps.BidService), []string{"user", "admin", "super_admin"})).Methods("DELETE")
 
+	//category routes
+	router.Handle("/category/all", middleware.RequireAuth(GetAllCategoiesHandler(deps.ArtworkService), []string{"user", "admin", "super_admin"})).Methods("GET")
+	router.Handle("/category/create", middleware.RequireAuth(CreateCategoryHandler(deps.ArtworkService), []string{"admin", "super_admin"})).Methods("POST")
+
 	return *router
 }
 

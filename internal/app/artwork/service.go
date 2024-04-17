@@ -19,6 +19,8 @@ type Service interface {
 	GetArtworks(category string, start int, count int) ([]dto.GetArtworkResponse, int, error)
 	GetArtworkByID(id string) (dto.GetArtworkResponse, error)
 	DeleteArtworkById(id string, owner_id string, role string) error
+	GetAllCategoies() ([]repository.Category, error)
+	CreateCategory(name string) error
 }
 
 func NewService(artworkRepo repository.ArtworkStorer) Service {
@@ -109,4 +111,17 @@ func (as *service) DeleteArtworkById(id string, owner_id string, role string) er
 
 	return nil
 
+}
+
+func (as *service) GetAllCategoies() ([]repository.Category, error) {
+	categoryList, err := as.artworkRepo.GetAllCategories()
+	return categoryList, err
+}
+
+func (as *service) CreateCategory(name string) error {
+	if name == "" {
+		return apperrors.BadRequest{ErrorMsg: "Invalid Category Name"}
+	}
+	err := as.artworkRepo.CreateCategory(name)
+	return err
 }

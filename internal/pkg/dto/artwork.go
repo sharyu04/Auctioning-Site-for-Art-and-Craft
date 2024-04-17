@@ -33,3 +33,7 @@ type Resp struct {
 	RespData   []GetArtworkResponse `json:"respBody"`
 	TotalCount int                  `json:"totalCount"`
 }
+
+type CreateCategoryRequest struct {
+	Name string `json:"name"`
+}

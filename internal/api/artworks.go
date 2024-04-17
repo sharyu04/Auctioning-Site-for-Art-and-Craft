@@ -49,7 +49,6 @@ func createArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	}
 }
 
-
 func GetArtworksHandler(artworkSvc artwork.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		category := r.URL.Query().Get("category")
@@ -141,13 +140,68 @@ func DeleteArtworkHandler(artworkSvc artwork.Service) http.HandlerFunc {
 		err := artworkSvc.DeleteArtworkById(id, Owner_id, role)
 
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Artwork deleted"))
-		return
+
+	}
+}
+
+func GetAllCategoiesHandler(artworkSvc artwork.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		categoryList, err := artworkSvc.GetAllCategoies()
+		if err != nil {
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
+			return
+		}
+
+		resBody, err := json.Marshal(categoryList)
+
+		if err != nil {
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resBody)
+
+	}
+}
+
+func CreateCategoryHandler(artworkSvc artwork.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req dto.CreateCategoryRequest
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
+			return
+		}
+
+		err = artworkSvc.CreateCategory(req.Name)
+		if err != nil {
+			errResponse := apperrors.MapError(err)
+			w.WriteHeader(errResponse.ErrorCode)
+			res, _ := json.Marshal(errResponse)
+			w.Write(res)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Category created successfully!"))
 	}
 }

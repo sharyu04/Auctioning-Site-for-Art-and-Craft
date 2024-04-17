@@ -18,6 +18,8 @@ type ArtworkStorer interface {
 	GetFilterArtworks(category string, start, count int) ([]dto.GetArtworkResponse, int, error)
 	GetArtworkById(artworkId uuid.UUID) (dto.GetArtworkResponse, error)
 	DeleteArtworkById(artworkId uuid.UUID, ownerId uuid.UUID, role string) error
+	GetAllCategories() ([]Category, error)
+	CreateCategory(name string) error
 }
 
 type Artworks struct {
@@ -94,6 +96,33 @@ func (as *artworkStore) GetCategory(categoryName string) (Category, error) {
 
 	if i == 0 {
 		return Category{}, apperrors.BadRequest{ErrorMsg: "Invalid Category"}
+	}
+
+	return category, nil
+
+}
+
+func (as *artworkStore) GetAllCategories() ([]Category, error) {
+
+	category := []Category{}
+
+	rows, err := as.DB.Query("SELECT * FROM category")
+	if err != nil {
+		return category, err
+	}
+	i := 0
+	for rows.Next() {
+		i++
+		var cat Category
+		err := rows.Scan(&cat.Id, &cat.Name)
+		if err != nil {
+			return category, err
+		}
+		category = append(category, cat)
+	}
+
+	if i == 0 {
+		return category, apperrors.BadRequest{ErrorMsg: "No categories exist"}
 	}
 
 	return category, nil
@@ -242,4 +271,26 @@ func (as *artworkStore) DeleteArtworkById(artworkId uuid.UUID, ownerId uuid.UUID
 
 	return nil
 
+}
+
+func (as *artworkStore) CreateCategory(name string) error {
+
+	rows, err := as.DB.Query("SELECT id, name FROM category where name = $1", name)
+	if err != nil {
+		return err
+	}
+	i := 0
+	for rows.Next() {
+		i++
+	}
+	if i != 0 {
+		return apperrors.BadRequest{ErrorMsg: "Category already exists"}
+	}
+
+	_, err = as.DB.Query("Insert into category(id, name) values(gen_random_uuid(),$1)", name)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
