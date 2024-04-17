@@ -17,6 +17,7 @@ type service struct {
 type Service interface {
 	CreateBid(bidDetails dto.CreateBidRequest) (bid repository.Bids, err error)
 	UpdateBid(updateRequest dto.UpdateBidRequest, bidder_id string) (repository.Bids, error)
+	DeleteBid(user_id string, role string, bidId string) (dto.DeleteBidResponse, error)
 }
 
 func NewService(bidRepo repository.BidStorer) Service {
@@ -86,4 +87,31 @@ func (bs *service) UpdateBid(updateRequest dto.UpdateBidRequest, bidder_id strin
 
 	return bs.bidRepo.UpdateBid(updateRequest, bidder_id)
 
+}
+
+func (bs *service) DeleteBid(user_id string, role string, bid_id string) (dto.DeleteBidResponse, error) {
+	if user_id == "" {
+		return dto.DeleteBidResponse{}, apperrors.UnAuthorizedAccess{ErrorMsg: "No user logged in!"}
+	}
+
+	userId, err := uuid.Parse(user_id)
+	if err != nil {
+		return dto.DeleteBidResponse{}, err
+	}
+
+	bidId, err := uuid.Parse(bid_id)
+	if err != nil {
+		return dto.DeleteBidResponse{}, err
+	}
+
+	err = bs.bidRepo.DeleteBid(userId, role, bidId)
+	if err != nil {
+		return dto.DeleteBidResponse{}, err
+	}
+
+	res := dto.DeleteBidResponse{
+		Message: "Bid deleted successfully!",
+	}
+
+	return res, nil
 }

@@ -35,6 +35,7 @@ func NewRouter(deps app.Dependencies) mux.Router {
 	//bids routes
 	router.Handle("/bid/create", middleware.RequireAuth(createBidHandler(deps.BidService), []string{"user"})).Methods("POST")
 	router.Handle("/bid/update", middleware.RequireAuth(updateBidHandler(deps.BidService), []string{"user"})).Methods("PUT")
+	router.Handle("/bid/delete", middleware.RequireAuth(deleteBidHandler(deps.BidService), []string{"user", "admin", "super_admin"})).Methods("DELETE")
 
 	return *router
 }

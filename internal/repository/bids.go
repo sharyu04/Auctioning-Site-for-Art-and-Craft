@@ -25,6 +25,7 @@ type BidStorer interface {
 	GetBidStatus(bidStatusName string) (BidStatus, error)
 	GetHighestBid(artWorkId string) (float64, float64, error)
 	UpdateBid(bid dto.UpdateBidRequest, bidder_id string) (Bids, error)
+	DeleteBid(user_id uuid.UUID, role string, bid_id uuid.UUID) error
 }
 
 type BidStatus struct {
@@ -213,4 +214,86 @@ func (bs *bidStore) GetBidsByArtworkId(artwork_id uuid.UUID) ([]Bids, error) {
 	}
 
 	return bidsList, nil
+}
+
+func (bs *bidStore) DeleteBid(user_id uuid.UUID, role string, bid_id uuid.UUID) error {
+	// get artwork id and check for authorization
+	var artwork_id uuid.UUID
+	if role == "user" {
+		row, err := bs.DB.Query("Select artwork_id from bids where bidder_id = $1 and id = $2", user_id, bid_id)
+		if err != nil {
+			return err
+		}
+
+		i := 0
+		for row.Next() {
+			if err := row.Scan(&artwork_id); err != nil {
+				return err
+			}
+			if artwork_id == uuid.Nil {
+				return apperrors.UnAuthorizedAccess{ErrorMsg: "Unauthorized Delete"}
+			}
+			i++
+		}
+		if i == 0 {
+			return apperrors.UnAuthorizedAccess{ErrorMsg: "Unauthorized Delete"}
+		}
+
+	} else {
+		row, err := bs.DB.Query("Select artwork_id from bids where id = $1", bid_id)
+
+		if err != nil {
+			return err
+		}
+
+		i := 0
+		for row.Next() {
+			if err := row.Scan(&artwork_id); err != nil {
+				return err
+			}
+			if artwork_id == uuid.Nil {
+				return apperrors.UnAuthorizedAccess{ErrorMsg: "Unauthorized Delete"}
+			}
+			i++
+		}
+
+		if i == 0 {
+			return apperrors.BadRequest{ErrorMsg: "No such bid exists"}
+		}
+
+	}
+
+	//set new highest bid in the artwork
+	var newHighestBid uuid.UUID
+	row, err := bs.DB.Query("Select id, MAX(amount) from bids group by id having artwork_id = $1 and id != $2", artwork_id, bid_id)
+	if err != nil {
+		return err
+	}
+	for row.Next() {
+		var amount float64
+		if err := row.Scan(&newHighestBid, &amount); err != nil {
+			return err
+		}
+	}
+
+	if newHighestBid == uuid.Nil {
+		_, err := bs.DB.Query("Update artworks set highest_bid = null where id = $1", artwork_id)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := bs.DB.Query("Update artworks set highest_bid = $1 where id = $2", newHighestBid, artwork_id)
+		if err != nil {
+			return err
+		}
+	}
+
+	//delete bid
+	_, err = bs.DB.Query("Delete from bids where id = $1", bid_id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
